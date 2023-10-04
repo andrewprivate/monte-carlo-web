@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Monte Carlo Simulation</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <h1>Monte Carlo Simulation of Photons</h1>
+    <p>Simulate photons using the Monte Carlo method as described in Chapter 4 of Lihong Wang's <i>Biomedical Optics</i> textbook. The code is based on the C++ version found on <a href="http://coilab.caltech.edu/mc.html">http://coilab.caltech.edu/mc.html</a></p>
+    <div class="io">
+        <div>
+            <div class="title">Input</div>
+            <div id="configInput"></div>
+        </div>
+
+        <div>
+            <div class="title">Output</div>
+            <div id="configOutput"></div>
+        </div>
+    </div>
+    <div class="runSelector"></div>
+    <div id="runbtn" class="clickable">
+
+        <div class="progress"></div>
+        <div class="text">Run Simulation</div>
+    </div>
+
+    <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ace/ace_grammar.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="main.mjs" type="module" charset="utf-8"></script>
+</body>
+
+</html>

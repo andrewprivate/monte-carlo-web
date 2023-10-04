@@ -1,0 +1,1 @@
+This repository is available for educational purposes only. Commercial usage is not allowed. Please see the respective licenses for the original algorithm.
