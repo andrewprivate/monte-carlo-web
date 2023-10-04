@@ -363,6 +363,7 @@ initializeCharts()
 
 document.getElementById('cleargraphs').addEventListener('click', () => {
   initializeCharts()
+  document.getElementById('videoContainer').replaceChildren()
 })
 
 window.simulationRunner = simulationRunner
