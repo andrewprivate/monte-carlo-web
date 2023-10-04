@@ -31,7 +31,7 @@ export class OutputCalc {
       for (let j = 0; j < runConfig.nr; j++) {
         const val = a_rz[j][iz]
         a_z[iz] += val
-        a_l[layer] += val
+        a_l[layer - 1] += val
         a += val
       }
     }
