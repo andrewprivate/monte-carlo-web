@@ -65,6 +65,7 @@ function parseConfig () {
     const config = MonteCarloConfigParser.parseConfigFile(inputEditor.getValue())
     ConfigInput.classList.remove('error')
     simulationRunner.setConfig(config)
+    resetRunButton()
     updateDropdown(config)
   } catch (e) {
     console.error(e)
@@ -93,12 +94,19 @@ runButton.addEventListener('click', async () => {
   })
 
   outputEditor.setValue(output, -1)
-  runButton.classList.add('clickable')
-  text.textContent = 'Run'
-  progress.style.width = '100%'
+
+  resetRunButton()
 
   appendChartData(results)
 })
+
+function resetRunButton () {
+  const progress = runButton.getElementsByClassName('progress')[0]
+  const text = runButton.getElementsByClassName('text')[0]
+  runButton.classList.add('clickable')
+  text.textContent = 'Run Simulation Using ' + simulationRunner.workers.length + ' Workers'
+  progress.style.width = '100%'
+}
 
 function createLineChart (title, xlabel, ylabel) {
   const chartCanvas = document.createElement('canvas')
