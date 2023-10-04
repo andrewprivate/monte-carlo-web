@@ -36,11 +36,11 @@ function updateDropdown (config) {
   const obj = {}
   for (let i = 0; i < runs; i++) {
     const run = config.runs[i]
-    if (!run.name) run.name = 'Run ' + (i + 1) + ' (' + run.number_of_photons + ' photons)'
+    if (!run.name) run.name = (run.output_file.split(/\s/)[0].replace('.mco', '') || ('Run ' + (i + 1))) + ' (' + run.number_of_photons + ' photons)'
     obj[i] = run.name
   }
 
-  const el = Utils.createDropdown(0, 'Selected', obj, (val) => {
+  const el = Utils.createDropdown(0, 'Selected Run', obj, (val) => {
     selectedRun = parseInt(val)
   }, (val, newName) => {
     const run = config.runs[parseInt(val)]
