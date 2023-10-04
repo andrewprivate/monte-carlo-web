@@ -1,6 +1,6 @@
 import { Go } from './mcml/Go.mjs'
 import { PhotonPacket } from './mcml/PhotonPacket.mjs'
-import { MersenneTwister } from './mcml/Twister.mjs'
+// import { MersenneTwister } from './mcml/Twister.mjs'
 
 export class MonteCarlo {
   constructor (runConfig, seed) {
@@ -16,7 +16,7 @@ export class MonteCarlo {
     this.weightThreshold = runConfig.wth
 
     this.rSpecular = Go.calculateRSpecular(this.layers)
-    this.random = new MersenneTwister(seed || 0)
+    this.random = Math // new MersenneTwister(seed)
 
     this.result = {}
     this.result.tt_ra = new Array(this.nr)
