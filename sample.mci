@@ -25,13 +25,13 @@ example.mco	A				# output filename, ASCII/Binary
 ### Specify data for run 2
 fig3.2.mco A				# output filename, ASCII/Binary
 1000000						# No. of photons
-0.0001	0.0001					# dz, dr
-200	200	1	10			# No. of dz, dr, da, t
+0.001	0.001					# dz, dr
+200	200	1	50			# No. of dz, dr, da, t
 
 1						# No. of layers
 # n	mua	mus	g	d		# One line for each layer
 1.0						# n for medium above.
-1.0	10	90	0.75	0.02		# layer 1
+1.5	10	90	0	0.2		# layer 1
 1.0						# n for medium below.
 
 ### Specify data for run 3

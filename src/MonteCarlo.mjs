@@ -31,9 +31,9 @@ export class MonteCarlo {
 
     this.result.w_txz = new Array(this.nt)
     for (let i = 0; i < this.nt; i++) {
-      this.result.w_txz[i] = new Array(this.nr)
+      this.result.w_txz[i] = new Array(this.nr * 2)
 
-      for (let j = 0; j < this.nr; j++) {
+      for (let j = 0; j < this.nr * 2; j++) {
         this.result.w_txz[i][j] = new Float32Array(this.nz)
       }
     }
@@ -49,9 +49,9 @@ export class MonteCarlo {
     while (!photon.dead) {
       Go.hopDropSpin(this, photon, this.result)
       if (tick < this.nt) {
-        const ix = Math.round(photon.position.x / this.dr) + Math.floor(this.nr / 2)
+        const ix = Math.round(photon.position.x / this.dr) + this.nr
         const iz = Math.floor(photon.position.z / this.dz)
-        if (ix >= 0 && ix < this.nr && iz < this.nz) {
+        if (ix >= 0 && ix < this.nr * 2 && iz < this.nz) {
           this.result.w_txz[tick][ix][iz] += photon.weight
         }
       }

@@ -371,7 +371,7 @@ window.simulationRunner = simulationRunner
 async function createVideo (results, container) {
   return new Promise((resolve, reject) => {
     const w_txz = results.w_txz
-    const nr = results.config.nr
+    const nx = results.config.nr * 2
     const nz = results.config.nz
     const nt = results.config.nt
     const dr = results.config.dr
@@ -381,9 +381,9 @@ async function createVideo (results, container) {
 
     const canvas = document.createElement('canvas')
 
-    const scale = 800 / Math.max(nr * dr, nz * dz)
+    const scale = 1920 / Math.max(nx * dr, nz * dz)
 
-    canvas.width = Math.ceil(nr * dr * scale)
+    canvas.width = Math.ceil(nx * dr * scale)
     canvas.height = Math.ceil(nz * dz * scale)
 
     if (container) container.replaceChildren(canvas)
@@ -418,7 +418,7 @@ async function createVideo (results, container) {
       }, 0))
     }, 0)
 
-    const gcolors = Pallete('tol-rainbow', 200).map((hex) => {
+    const gcolors = Pallete('tol-rainbow', 128).map((hex) => {
       return '#' + hex
     })
     function render () {
@@ -451,7 +451,7 @@ async function createVideo (results, container) {
       ctx.globalAlpha = 0.5
 
       // draw photons
-      for (let ix = 0; ix < nr; ix++) {
+      for (let ix = 0; ix < nx; ix++) {
         for (let iz = 0; iz < nz; iz++) {
           const value = t_rz[ix][iz]
           if (value === 0) continue

@@ -126,7 +126,7 @@ export class OutputCalc {
 
     const scale1 = n_photons * dz * dr
     for (let it = 0; it < nt; it++) {
-      for (let ir = 0; ir < nr; ir++) {
+      for (let ir = 0; ir < nr * 2; ir++) {
         for (let iz = 0; iz < runConfig.nz; iz++) {
           results.w_txz[it][ir][iz] /= scale1
         }
