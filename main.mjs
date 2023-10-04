@@ -1,3 +1,4 @@
+import { Pallete } from './chartjs/pallete.mjs'
 import { Grammar } from './src/grammar.mjs'
 import { MonteCarloConfigParser } from './src/MonteCarloConfig.mjs'
 import { SimulationRunner } from './src/SimulationRunner.mjs'
@@ -124,9 +125,6 @@ function createLineChart (title, xlabel, ylabel) {
           text: title
         }
       },
-      line: {
-        tension: 0
-      },
       scales: {
         x: {
           title: {
@@ -146,6 +144,10 @@ function createLineChart (title, xlabel, ylabel) {
       elements: {
         point: {
           radius: 0
+        },
+        line: {
+          tension: 0,
+          borderWidth: 1
         }
       }
     }
@@ -182,8 +184,13 @@ function initializeCharts () {
   ChartsContainer.appendChild(Charts.transmittance.container)
 }
 
+const colors = Pallete('tol', 10).map((hex) => {
+  return '#' + hex
+})
+
 function appendChartData (result) {
   const runName = simulationRunner.config.runs[selectedRun].name
+  const color = colors[Charts.fluence.dataset.length % colors.length]
   const fluenceData = []
   for (let i = 0; i < result.fluence.length; i++) {
     const z = result.config.dz * (i + 0.5)
@@ -195,7 +202,9 @@ function appendChartData (result) {
 
   Charts.fluence.appendData({
     label: runName,
-    data: fluenceData
+    data: fluenceData,
+    borderColor: color,
+    backgroundColor: color
   })
 
   const absorbanceData = []
@@ -209,7 +218,9 @@ function appendChartData (result) {
 
   Charts.absorbance.appendData({
     label: runName,
-    data: absorbanceData
+    data: absorbanceData,
+    borderColor: color,
+    backgroundColor: color
   })
 
   const reflectanceData = []
@@ -223,7 +234,9 @@ function appendChartData (result) {
 
   Charts.reflectance.appendData({
     label: runName,
-    data: reflectanceData
+    data: reflectanceData,
+    borderColor: color,
+    backgroundColor: color
   })
 
   const transmittanceData = []
@@ -237,7 +250,9 @@ function appendChartData (result) {
 
   Charts.transmittance.appendData({
     label: runName,
-    data: transmittanceData
+    data: transmittanceData,
+    borderColor: color,
+    backgroundColor: color
   })
 }
 
