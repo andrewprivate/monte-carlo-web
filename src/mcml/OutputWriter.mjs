@@ -138,6 +138,7 @@ export class OutputWriter {
     this.writeLine('RAT #Reflectance, absorption, transmission.')
     this.writeLine(`${result.rsp.toFixed(6)} \t# Specular reflectance [-]`)
     this.writeLine(`${result.rd.toFixed(6)} \t# Diffuse reflectance [-]`)
+    this.writeLine(`# ${(result.rd + result.rsp).toFixed(6)} \t# Total reflectance [-]`)
     this.writeLine(`${result.a.toFixed(6)} \t# Absorbed fraction [-]`)
     this.writeLine(`${result.tt.toFixed(6)} \t# Transmittance [-]\n`)
   }
