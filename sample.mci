@@ -26,7 +26,7 @@ example.mco	A				# output filename, ASCII/Binary
 fig3.2.mco A				# output filename, ASCII/Binary
 1000000						# No. of photons
 0.0001	0.0001					# dz, dr
-200	200	1	50			# No. of dz, dr, da, t
+200	200	1	10			# No. of dz, dr, da, t
 
 1						# No. of layers
 # n	mua	mus	g	d		# One line for each layer
@@ -38,7 +38,7 @@ fig3.2.mco A				# output filename, ASCII/Binary
 n_rel=1.mco A				# output filename, ASCII/Binary
 1000000						# No. of photons
 0.005	0.005					# dz, dr
-200	200	1	50			# No. of dz, dr, da, t
+200	200	1	80			# No. of dz, dr, da, t
 
 1						# No. of layers
 # n	mua	mus	g	d		# One line for each layer
@@ -50,7 +50,7 @@ n_rel=1.mco A				# output filename, ASCII/Binary
 n_rel=1.37.mco A				# output filename, ASCII/Binary
 1000000						# No. of photons
 0.005	0.005					# dz, dr
-200	200	1	50			# No. of dz, dr, da, t
+200	200	1	80			# No. of dz, dr, da, t
 
 1						# No. of layers
 # n	mua	mus	g	d		# One line for each layer

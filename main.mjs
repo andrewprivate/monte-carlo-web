@@ -474,6 +474,11 @@ function syncVideos () {
   const videoContainer = document.getElementById('videoContainer')
   const videos = videoContainer.getElementsByTagName('video')
   for (let i = 0; i < videos.length; i++) {
+    // if there is video that hasn't ended, then don't sync
+    if (!videos[i].ended) return
+  }
+
+  for (let i = 0; i < videos.length; i++) {
     videos[i].currentTime = 0
     videos[i].play()
   }
