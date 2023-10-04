@@ -175,6 +175,22 @@ body {
     padding: 5px;
 }
 
+#videoContainer .container .remove-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(200, 20, 20, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    display: none;
+}
+
+#videoContainer .container:hover .remove-button {
+    display: block;
+}
+
 #videoContainer .container .title {
     font-size: 20px;
     text-align: center;
