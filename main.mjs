@@ -4,8 +4,10 @@ import { SimulationRunner } from './src/SimulationRunner.mjs'
 import { Utils } from './src/Utils.mjs'
 
 const simulationRunner = new SimulationRunner()
+const ChartsContainer = document.getElementById('charts')
+const ConfigInput = document.getElementById('configInput')
 
-const configInput = document.getElementById('configInput')
+const Charts = {}
 
 const inputEditor = window.ace.edit('configInput')
 inputEditor.session.setOptions({
@@ -57,18 +59,18 @@ inputEditor.session.addEventListener('change', () => {
 function parseConfig () {
   try {
     const config = MonteCarloConfigParser.parseConfigFile(inputEditor.getValue())
-    configInput.classList.remove('error')
+    ConfigInput.classList.remove('error')
     simulationRunner.setConfig(config)
     updateDropdown(config)
   } catch (e) {
     console.error(e)
-    configInput.classList.add('error')
+    ConfigInput.classList.add('error')
   }
 }
 
 const runButton = document.getElementById('runbtn')
 runButton.addEventListener('click', async () => {
-  if (!runButton.classList.contains('clickable') || configInput.classList.contains('error')) {
+  if (!runButton.classList.contains('clickable') || ConfigInput.classList.contains('error')) {
     return
   }
 
@@ -80,7 +82,8 @@ runButton.addEventListener('click', async () => {
   progress.style.width = '0%'
   text.textContent = 'Running...'
 
-  const { results, output } = await simulationRunner.runSimulation(selectedRun, (results, completed, total) => {
+  const runIndex = selectedRun
+  const { results, output } = await simulationRunner.runSimulation(runIndex, (results, completed, total) => {
     text.textContent = `Simulated ${completed} / ${total} photons`
     progress.style.width = `${(completed / total) * 100}%`
   })
@@ -89,6 +92,134 @@ runButton.addEventListener('click', async () => {
   runButton.classList.add('clickable')
   text.textContent = 'Run'
   progress.style.width = '100%'
+
+  appendChartData(results)
 })
+
+function createLineChart (title, xlabel, ylabel) {
+  const chartCanvas = document.createElement('canvas')
+  const dataset = []
+  const chart = new window.Chart(chartCanvas, {
+    type: 'line',
+    data: {
+      datasets: dataset
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: title
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: xlabel
+          },
+          type: 'linear'
+        },
+        y: {
+          title: {
+            display: true,
+            text: ylabel
+          },
+          type: 'linear'
+        }
+      }
+    }
+  })
+
+  const container = document.createElement('div')
+  container.classList.add('chartContainer')
+  container.appendChild(chartCanvas)
+
+  return {
+    chart,
+    dataset,
+    chartCanvas,
+    container,
+    appendData: (data) => {
+      dataset.push(data)
+      chart.update()
+    }
+  }
+}
+
+function initializeCharts () {
+  ChartsContainer.replaceChildren()
+  Charts.fluence = createLineChart('Internal Fluence Over Depth', 'Depth (cm)', 'Fluence (-)')
+  ChartsContainer.appendChild(Charts.fluence.container)
+
+  Charts.absorbance = createLineChart('Absorbance Over Depth', 'Depth (cm)', 'Absorbance (-)')
+  ChartsContainer.appendChild(Charts.absorbance.container)
+
+  Charts.reflectance = createLineChart('Diffuse Reflectance Over Distance', 'Distance (cm)', 'Reflectance (-)')
+  ChartsContainer.appendChild(Charts.reflectance.container)
+
+  Charts.transmittance = createLineChart('Transmittance Over Distance', 'Distance (cm)', 'Transmittance (-)')
+  ChartsContainer.appendChild(Charts.transmittance.container)
+}
+
+function appendChartData (result) {
+  const fluenceData = []
+  for (let i = 0; i < result.fluence.length; i++) {
+    const z = result.config.dz * (i + 0.5)
+    fluenceData.push({
+      x: z,
+      y: result.fluence[i]
+    })
+  }
+
+  Charts.fluence.appendData({
+    label: `Run ${selectedRun + 1}`,
+    data: fluenceData
+  })
+
+  const absorbanceData = []
+  for (let i = 0; i < result.a_z.length; i++) {
+    const z = result.config.dz * (i + 0.5)
+    absorbanceData.push({
+      x: z,
+      y: result.a_z[i]
+    })
+  }
+
+  Charts.absorbance.appendData({
+    label: `Run ${selectedRun + 1}`,
+    data: absorbanceData
+  })
+
+  const reflectanceData = []
+  for (let i = 0; i < result.rd_r.length; i++) {
+    const r = result.config.dr * (i + 0.5)
+    reflectanceData.push({
+      x: r,
+      y: result.rd_r[i]
+    })
+  }
+
+  Charts.reflectance.appendData({
+    label: `Run ${selectedRun + 1}`,
+    data: reflectanceData
+  })
+
+  const transmittanceData = []
+  for (let i = 0; i < result.tt_r.length; i++) {
+    const r = result.config.dr * (i + 0.5)
+    transmittanceData.push({
+      x: r,
+      y: result.tt_r[i]
+    })
+  }
+
+  Charts.transmittance.appendData({
+    label: `Run ${selectedRun + 1}`,
+    data: transmittanceData
+  })
+}
+
+initializeCharts()
 
 window.simulationRunner = simulationRunner

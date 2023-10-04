@@ -134,5 +134,20 @@ export class OutputCalc {
 
     this.scaleRdTt(runConfig, results)
     this.scaleA(runConfig, results)
+
+    // calculate fluence
+    const fluence = new Float32Array(runConfig.nz)
+    for (let iz = 0; iz < runConfig.nz; iz++) {
+      const layer = this.izToLayer(iz, runConfig.dz, runConfig.layers)
+      if (runConfig.layers[layer].mua === 0) {
+        fluence[iz] = 0
+        continue
+      }
+
+      fluence[iz] = results.a_z[iz] / runConfig.layers[layer].mua
+    }
+
+    results.fluence = fluence
+    results.config = runConfig
   }
 }
