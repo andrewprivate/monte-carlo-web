@@ -181,7 +181,7 @@ function createLineChart (title, xlabel, ylabel) {
       },
       elements: {
         point: {
-          radius: 1
+          radius: 0
         },
         line: {
           tension: 0,
