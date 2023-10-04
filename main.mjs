@@ -124,6 +124,9 @@ function createLineChart (title, xlabel, ylabel) {
           text: title
         }
       },
+      line: {
+        tension: 0
+      },
       scales: {
         x: {
           title: {
@@ -138,6 +141,11 @@ function createLineChart (title, xlabel, ylabel) {
             text: ylabel
           },
           type: 'linear'
+        }
+      },
+      elements: {
+        point: {
+          radius: 0
         }
       }
     }
