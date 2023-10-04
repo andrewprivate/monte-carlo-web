@@ -169,14 +169,21 @@ function createLineChart (title, xlabel, ylabel) {
             display: true,
             text: xlabel
           },
-          type: 'linear'
+          type: 'linear',
+          ticks: {
+            autoSkip: true
+          }
         },
         y: {
           title: {
             display: true,
             text: ylabel
           },
-          type: 'linear'
+          type: 'linear',
+          ticks: {
+            autoSkip: true,
+            autoSkipPadding: 10
+          }
         }
       },
       elements: {
