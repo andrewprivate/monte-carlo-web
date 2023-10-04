@@ -123,8 +123,17 @@ runButton.addEventListener('click', async () => {
   const video = document.createElement('div')
   video.classList.add('video')
 
+  const removeBtn = document.createElement('button')
+  removeBtn.classList.add('remove-button')
+  removeBtn.textContent = 'Remove Video'
+
+  removeBtn.addEventListener('click', () => {
+    container.remove()
+  })
+
   container.appendChild(title)
   container.appendChild(video)
+  container.appendChild(removeBtn)
   videoContainer.appendChild(container)
   syncVideos()
   createVideo(results, video).then(url => {
