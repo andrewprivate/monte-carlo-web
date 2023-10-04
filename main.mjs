@@ -433,7 +433,10 @@ async function createVideo (results, container) {
       const it = Math.floor(elapsed / scaleT)
       const t_rz = w_txz[it]
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      // fill white
+      ctx.fillStyle = 'white'
+      ctx.globalAlpha = 1
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       // draw layers
       for (let i = 1; i < results.config.layers.length - 1; i++) {
