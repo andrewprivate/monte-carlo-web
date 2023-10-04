@@ -403,7 +403,8 @@ async function createVideo (results, container) {
     const stream = canvas.captureStream(30 /* fps */)
     const mediaRecorder = new MediaRecorder(stream,
       {
-        mimeType: 'video/webm; codecs=vp8'
+        mimeType: 'video/webm; codecs=vp8',
+        videoBitsPerSecond: 50 * 1024 * 1024
       })
     const chunks = []
 
