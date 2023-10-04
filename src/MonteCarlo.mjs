@@ -24,9 +24,9 @@ export class MonteCarlo {
     this.result.a_rz = new Array(this.nr)
 
     for (let i = 0; i < this.nr; i++) {
-      this.result.tt_ra[i] = new Float32Array(this.na)
-      this.result.rd_ra[i] = new Float32Array(this.na)
-      this.result.a_rz[i] = new Float32Array(this.nz)
+      this.result.tt_ra[i] = new Float64Array(this.na)
+      this.result.rd_ra[i] = new Float64Array(this.na)
+      this.result.a_rz[i] = new Float64Array(this.nz)
     }
 
     this.result.w_txz = new Array(this.nt)
@@ -34,7 +34,7 @@ export class MonteCarlo {
       this.result.w_txz[i] = new Array(this.nr * 2)
 
       for (let j = 0; j < this.nr * 2; j++) {
-        this.result.w_txz[i][j] = new Float32Array(this.nz)
+        this.result.w_txz[i][j] = new Float64Array(this.nz)
       }
     }
   }
