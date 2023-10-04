@@ -455,7 +455,7 @@ async function createVideo (results, container) {
         for (let iz = 0; iz < nz; iz++) {
           const value = t_rz[ix][iz]
           if (value === 0) continue
-          const r = Math.log(value * (it + 1) + 1) / Math.log(maxValue + 1)
+          const r = Math.log(value + 1) / Math.log(maxValue + 1)
 
           if (r > 0) {
             ctx.fillStyle = gcolors[Math.min(Math.floor(r * gcolors.length), gcolors.length - 1)]
