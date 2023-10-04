@@ -1,7 +1,7 @@
 export class OutputCalc {
   static sum2d (matrix) {
-    const sumAxis0 = new Float32Array(matrix[0].length)
-    const sumAxis1 = new Float32Array(matrix.length)
+    const sumAxis0 = new Float64Array(matrix[0].length)
+    const sumAxis1 = new Float64Array(matrix.length)
     let sum = 0
 
     for (let i = 0; i < matrix.length; i++) {
@@ -22,8 +22,8 @@ export class OutputCalc {
   }
 
   static sum2dA (runConfig, a_rz) {
-    const a_z = new Float32Array(runConfig.nz)
-    const a_l = new Float32Array(runConfig.layers.length - 2)
+    const a_z = new Float64Array(runConfig.nz)
+    const a_l = new Float64Array(runConfig.layers.length - 2)
     let a = 0
 
     for (let iz = 0; iz < runConfig.nz; iz++) {
@@ -154,7 +154,7 @@ export class OutputCalc {
     this.scaleW(runConfig, results)
 
     // calculate fluence
-    const fluence = new Float32Array(runConfig.nz)
+    const fluence = new Float64Array(runConfig.nz)
     for (let iz = 0; iz < runConfig.nz; iz++) {
       const layer = this.izToLayer(iz, runConfig.dz, runConfig.layers)
       if (runConfig.layers[layer].mua === 0) {
