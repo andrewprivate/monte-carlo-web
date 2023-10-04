@@ -1,3 +1,4 @@
+/* eslint-disable */
 /** @license
  *
  *     Colour Palette Generator script.

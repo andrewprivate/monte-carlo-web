@@ -124,6 +124,43 @@ function createLineChart (title, xlabel, ylabel) {
         title: {
           display: true,
           text: title
+        },
+        zoom: {
+          zoom: {
+            wheel: {
+              enabled: false
+            },
+            pinch: {
+              enabled: true
+            },
+            pan: {
+              enabled: true,
+              mode: 'xy'
+            },
+            drag: {
+              enabled: true
+            }
+          }
+        },
+        tooltip: {
+          mode: 'interpolate',
+          intersect: false,
+          animation: false,
+          callbacks: {
+            title: function (a, d) {
+              return a[0].element.x.toFixed(4)
+            },
+            label: function (d) {
+              return (
+                d.chart.data.datasets[d.datasetIndex].label + ': ' + d.element.y.toFixed(4)
+              )
+            }
+          }
+        },
+        crosshair: {
+          zoom: {
+            enabled: false
+          }
         }
       },
       scales: {
@@ -144,7 +181,7 @@ function createLineChart (title, xlabel, ylabel) {
       },
       elements: {
         point: {
-          radius: 0
+          radius: 1
         },
         line: {
           tension: 0,
@@ -158,12 +195,17 @@ function createLineChart (title, xlabel, ylabel) {
   container.classList.add('chartContainer')
   container.appendChild(chartCanvas)
 
+  chartCanvas.addEventListener('dblclick', (e) => {
+    // reset zoom
+    chart.resetZoom()
+  })
   return {
     chart,
     dataset,
     chartCanvas,
     container,
     appendData: (data) => {
+      data.interpolate = true
       dataset.push(data)
       chart.update()
     }
@@ -176,7 +218,6 @@ function initializeCharts () {
   ChartsContainer.appendChild(Charts.fluence.container)
 
   Charts.fluence.chart.options.scales.y.type = 'logarithmic'
-  Charts.fluence.chart.options.scales.y.min = 0.5
   Charts.fluence.chart.update()
 
   Charts.absorbance = createLineChart('Absorbance Over Depth', 'Depth (cm)', 'Absorbance (-)')
