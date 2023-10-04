@@ -129,6 +129,12 @@ runButton.addEventListener('click', async () => {
 
   removeBtn.addEventListener('click', () => {
     container.remove()
+
+    // revoke url
+    const videoEl = video.getElementsByTagName('video')[0]
+    if (videoEl) {
+      URL.revokeObjectURL(videoEl.src)
+    }
   })
 
   container.appendChild(title)
