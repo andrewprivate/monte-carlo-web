@@ -123,6 +123,7 @@ body {
 }
 
 #charts {
+    margin-top: 5px;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -143,4 +144,24 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+#cleargraphs {
+    position: relative;
+    width: 100%;
+    padding: 5px 10px;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+    background-color: rgba(200, 20, 20, 0.8);
+}
+
+#cleargraphs:hover {
+    background-color: rgba(200, 20, 20, 1);
 }

@@ -75,13 +75,14 @@ export class Utils {
     }
   }
 
-  static createDropdown (defaultChoice, title, items, call) {
+  static createDropdown (defaultChoice, title, items, call, editableCallback = null) {
     const create = this.create
     const container = create('div', '', 'dropdown')
 
     const text = create('div', '')
     text.appendChild(document.createTextNode(`${title}: `))
     const span = create('span', 'color: rgb(200,200,200)', 'dropdown_text')
+    span.contentEditable = editableCallback !== null
     span.textContent = items[defaultChoice]
     text.appendChild(span)
     text.appendChild(document.createTextNode(' ˅'))
@@ -104,6 +105,38 @@ export class Utils {
     }
     container.appendChild(itemListElement)
     this.setupDropdown(itemListElement, text, container, call)
+
+    if (editableCallback) {
+      span.style.cursor = 'text'
+      span.addEventListener('input', (e) => {
+        const value = span.textContent
+        for (let i = 0; i < itemListElement.children.length; i++) {
+          const element = itemListElement.children[i]
+          if (element.dataset.val === container.dataset.val) {
+            element.textContent = value
+            break
+          }
+        }
+        editableCallback(container.dataset.val, value)
+        e.stopPropagation()
+      })
+
+      span.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          span.blur()
+          e.stopPropagation()
+          e.preventDefault()
+        }
+      })
+
+      span.addEventListener('click', (e) => {
+        e.stopPropagation()
+      })
+
+      span.addEventListener('keydown', (e) => {
+        e.stopPropagation()
+      })
+    }
     return container
   }
 }

@@ -36,11 +36,15 @@ function updateDropdown (config) {
   const obj = {}
   for (let i = 0; i < runs; i++) {
     const run = config.runs[i]
-    obj[i] = 'Run ' + (i + 1) + ' (' + run.number_of_photons + ' photons)'
+    if (!run.name) run.name = 'Run ' + (i + 1) + ' (' + run.number_of_photons + ' photons)'
+    obj[i] = run.name
   }
 
   const el = Utils.createDropdown(0, 'Selected', obj, (val) => {
     selectedRun = parseInt(val)
+  }, (val, newName) => {
+    const run = config.runs[parseInt(val)]
+    run.name = newName
   })
   selectedRun = 0
   selectorContainer.appendChild(el)
@@ -163,6 +167,7 @@ function initializeCharts () {
 }
 
 function appendChartData (result) {
+  const runName = simulationRunner.config.runs[selectedRun].name
   const fluenceData = []
   for (let i = 0; i < result.fluence.length; i++) {
     const z = result.config.dz * (i + 0.5)
@@ -173,7 +178,7 @@ function appendChartData (result) {
   }
 
   Charts.fluence.appendData({
-    label: `Run ${selectedRun + 1}`,
+    label: runName,
     data: fluenceData
   })
 
@@ -187,7 +192,7 @@ function appendChartData (result) {
   }
 
   Charts.absorbance.appendData({
-    label: `Run ${selectedRun + 1}`,
+    label: runName,
     data: absorbanceData
   })
 
@@ -201,7 +206,7 @@ function appendChartData (result) {
   }
 
   Charts.reflectance.appendData({
-    label: `Run ${selectedRun + 1}`,
+    label: runName,
     data: reflectanceData
   })
 
@@ -215,11 +220,15 @@ function appendChartData (result) {
   }
 
   Charts.transmittance.appendData({
-    label: `Run ${selectedRun + 1}`,
+    label: runName,
     data: transmittanceData
   })
 }
 
 initializeCharts()
+
+document.getElementById('cleargraphs').addEventListener('click', () => {
+  initializeCharts()
+})
 
 window.simulationRunner = simulationRunner
