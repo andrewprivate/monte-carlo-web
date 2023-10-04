@@ -118,6 +118,7 @@ function createLineChart (title, xlabel, ylabel) {
       datasets: dataset
     },
     options: {
+      aspectRatio: 1.5,
       responsive: true,
       plugins: {
         title: {
@@ -173,6 +174,10 @@ function initializeCharts () {
   ChartsContainer.replaceChildren()
   Charts.fluence = createLineChart('Internal Fluence Over Depth', 'Depth (cm)', 'Fluence (-)')
   ChartsContainer.appendChild(Charts.fluence.container)
+
+  Charts.fluence.chart.options.scales.y.type = 'logarithmic'
+  Charts.fluence.chart.options.scales.y.min = 0.5
+  Charts.fluence.chart.update()
 
   Charts.absorbance = createLineChart('Absorbance Over Depth', 'Depth (cm)', 'Absorbance (-)')
   ChartsContainer.appendChild(Charts.absorbance.container)
