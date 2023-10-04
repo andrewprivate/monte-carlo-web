@@ -15,7 +15,7 @@ export class LayerConfig {
 }
 
 export class RunConfig {
-  constructor (output_file, number_of_photons, dz, dr, nz, nr, na, layers) {
+  constructor (output_file, number_of_photons, dz, dr, nz, nr, na, nt, layers) {
     this.output_file = output_file
     this.number_of_photons = number_of_photons
     this.dz = dz
@@ -24,7 +24,7 @@ export class RunConfig {
     this.nz = nz
     this.nr = nr
     this.na = na
-    this.nt = 80
+    this.nt = nt || 80
     this.layers = layers
 
     this.wth = 1e-4
@@ -70,7 +70,7 @@ export class MonteCarloConfigParser {
 
       const number_of_photons = parseInt(nextLine())
       const [dz, dr] = lineArgs().map(a => parseFloat(a))
-      const [nz, nr, na] = lineArgs().map(a => parseInt(a))
+      const [nz, nr, na, nt] = lineArgs().map(a => parseInt(a))
       const number_of_layers = parseInt(nextLine())
 
       const layers = []
@@ -101,7 +101,7 @@ export class MonteCarloConfigParser {
         layer.cos_crit1 = n1 > n3 ? Math.sqrt(1 - n3 * n3 / (n1 * n1)) : 0
       }
 
-      runs.push(new RunConfig(output_file, number_of_photons, dz, dr, nz, nr, na, layers))
+      runs.push(new RunConfig(output_file, number_of_photons, dz, dr, nz, nr, na, nt, layers))
     }
 
     return new MonteCarloConfig(runs)

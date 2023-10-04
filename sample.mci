@@ -6,13 +6,13 @@
 ####
 
 1.0						# file version
-3						# number of runs
+4						# number of runs
 
 ### Specify data for run 1
 example.mco	A				# output filename, ASCII/Binary
 1000000						# No. of photons
 0.01	0.01					# dz, dr
-40	50	1				# No. of dz, dr & da.
+40	50	1	50			# No. of dz, dr, da, t
 
 3						# No. of layers
 # n	mua	mus	g	d		# One line for each layer
@@ -23,10 +23,22 @@ example.mco	A				# output filename, ASCII/Binary
 1.0						# n for medium below.
 
 ### Specify data for run 2
+fig3.2.mco A				# output filename, ASCII/Binary
+1000000						# No. of photons
+0.0001	0.0001					# dz, dr
+200	200	1	50			# No. of dz, dr, da, t
+
+1						# No. of layers
+# n	mua	mus	g	d		# One line for each layer
+1.0						# n for medium above.
+1.0	10	90	0.75	0.02		# layer 1
+1.0						# n for medium below.
+
+### Specify data for run 3
 n_rel=1.mco A				# output filename, ASCII/Binary
 1000000						# No. of photons
 0.005	0.005					# dz, dr
-200	200	1				# No. of dz, dr & da.
+200	200	1	50			# No. of dz, dr, da, t
 
 1						# No. of layers
 # n	mua	mus	g	d		# One line for each layer
@@ -34,11 +46,11 @@ n_rel=1.mco A				# output filename, ASCII/Binary
 1.0	0.1	100	0.90	1		# layer 1
 1.0						# n for medium below.
 
-### Specify data for run 3
+### Specify data for run 4
 n_rel=1.37.mco A				# output filename, ASCII/Binary
 1000000						# No. of photons
 0.005	0.005					# dz, dr
-200	200	1				# No. of dz, dr & da.
+200	200	1	50			# No. of dz, dr, da, t
 
 1						# No. of layers
 # n	mua	mus	g	d		# One line for each layer

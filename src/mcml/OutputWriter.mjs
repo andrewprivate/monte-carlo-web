@@ -143,12 +143,12 @@ export class OutputWriter {
   }
 
   writeInputParameters (runConfig) {
-    this.writeLine('InParm\t\t\t# Input parameters. cm is used.')
-    this.writeLine(`${runConfig.output_file.split(/\s/)[0]}\t\t# output file name, ASCII.`)
-    this.writeLine(`${runConfig.number_of_photons}\t\t\t# No. of photons`)
+    this.writeLine('InParm\t\t\t\t\t# Input parameters. cm is used.')
+    this.writeLine(`${runConfig.output_file.split(/\s/)[0]}\t\t\t\t# output file name, ASCII.`)
+    this.writeLine(`${runConfig.number_of_photons}\t\t\t\t\t# No. of photons`)
 
-    this.writeLine(`${runConfig.dz}\t${runConfig.dr}\t\t# dz, dr [cm]`)
-    this.writeLine(`${runConfig.nz}\t${runConfig.nr}\t${runConfig.na}\t# No. of dz, dr, da.\n`)
+    this.writeLine(`${runConfig.dz}\t${runConfig.dr}\t\t\t\t# dz, dr [cm]`)
+    this.writeLine(`${runConfig.nz}\t${runConfig.nr}\t${runConfig.na}\t${runConfig.nt}\t\t# No. of dz, dr, da, & t.\n`)
 
     this.writeLine(`${runConfig.layers.length - 2}\t\t\t\t\t# Number of layers`)
     this.writeLine('#n\tmua\tmus\tg\td\t# One line for each layer')
