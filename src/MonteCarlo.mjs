@@ -11,6 +11,7 @@ export class MonteCarlo {
     this.nz = runConfig.nz
     this.nr = runConfig.nr
     this.na = runConfig.na
+    this.nt = runConfig.nt
     this.survivalChance = runConfig.chance
     this.weightThreshold = runConfig.wth
 
@@ -27,6 +28,15 @@ export class MonteCarlo {
       this.result.rd_ra[i] = new Float32Array(this.na)
       this.result.a_rz[i] = new Float32Array(this.nz)
     }
+
+    this.result.w_txz = new Array(this.nt)
+    for (let i = 0; i < this.nt; i++) {
+      this.result.w_txz[i] = new Array(this.nr)
+
+      for (let j = 0; j < this.nr; j++) {
+        this.result.w_txz[i][j] = new Float32Array(this.nz)
+      }
+    }
   }
 
   launchPhoton () {
@@ -35,8 +45,17 @@ export class MonteCarlo {
     // Initialize the photon packet.
     Go.launchPhoton(this.rSpecular, this.layers, photon)
 
+    let tick = 0
     while (!photon.dead) {
       Go.hopDropSpin(this, photon, this.result)
+      if (tick < this.nt) {
+        const ix = Math.round(photon.position.x / this.dr) + Math.floor(this.nr / 2)
+        const iz = Math.floor(photon.position.z / this.dz)
+        if (ix >= 0 && ix < this.nr && iz < this.nz) {
+          this.result.w_txz[tick][ix][iz] += photon.weight
+        }
+      }
+      tick++
     }
   }
 }

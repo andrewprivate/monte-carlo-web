@@ -45,7 +45,7 @@ export class OutputCalc {
 
   static izToLayer (iz, dz, layers) {
     let i = 1
-    const num_layers = layers.length - 2
+    const num_layers = layers.length - 1
     while ((iz + 0.5) * dz >= layers[i].z1 && i < num_layers) {
       i++
     }
@@ -117,6 +117,23 @@ export class OutputCalc {
     results.a *= scale1
   }
 
+  static scaleW (runConfig, results) {
+    const nr = runConfig.nr
+    const nt = runConfig.nt
+    const dr = runConfig.dr
+    const dz = runConfig.dz
+    const n_photons = runConfig.number_of_photons
+
+    const scale1 = n_photons * dz * dr
+    for (let it = 0; it < nt; it++) {
+      for (let ir = 0; ir < nr; ir++) {
+        for (let iz = 0; iz < runConfig.nz; iz++) {
+          results.w_txz[it][ir][iz] /= scale1
+        }
+      }
+    }
+  }
+
   static sumScaleResult (runConfig, results) {
     const { sumAxis0: rd_a, sumAxis1: rd_r, sum: rd } = OutputCalc.sum2d(results.rd_ra)
     const { sumAxis0: tt_a, sumAxis1: tt_r, sum: tt } = OutputCalc.sum2d(results.tt_ra)
@@ -134,6 +151,7 @@ export class OutputCalc {
 
     this.scaleRdTt(runConfig, results)
     this.scaleA(runConfig, results)
+    this.scaleW(runConfig, results)
 
     // calculate fluence
     const fluence = new Float32Array(runConfig.nz)

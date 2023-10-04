@@ -36,12 +36,6 @@ export class Go {
     photon.weight = 1 - rSpecular
     photon.layer = 1
     photon.velocity.z = 1
-
-    // check if the first layer is clear
-    if (layers[1].mua === 0.0 && layers[1].mus === 0.0) {
-      photon.layer = 2
-      photon.position.z = this.layers[2].z0
-    }
   }
 
   /***********************************************************
@@ -130,6 +124,9 @@ export class Go {
     photon.position.x += s * photon.velocity.x
     photon.position.y += s * photon.velocity.y
     photon.position.z += s * photon.velocity.z
+
+    // update the position.r hypotenuse
+    photon.position.r = Math.hypot(photon.position.x, photon.position.y)
   }
 
   /***********************************************************
@@ -220,15 +217,13 @@ export class Go {
      * The dropped weight is assigned to the absorption array elements.
      */
   static drop (main, photon, output) {
-    const x = photon.position.x
-    const y = photon.position.y
     const layer = main.layers[photon.layer]
 
     // Compute array indices.
     const izd = photon.position.z / main.dz
     const iz = Math.min(Math.floor(izd), main.nz - 1)
 
-    const ird = Math.sqrt(x * x + y * y) / main.dr
+    const ird = photon.position.r / main.dr
     const ir = Math.min(Math.floor(ird), main.nr - 1)
 
     // Update photon weight.
@@ -311,12 +306,9 @@ export class Go {
      * Update the photon weight as well.
      ****/
   static recordR (main, Refl, photon, output) {
-    const x = photon.position.x
-    const y = photon.position.y
-
     let ir, ia
 
-    const ird = Math.sqrt(x * x + y * y) / main.dr
+    const ird = photon.position.r / main.dr
     if (ird > main.nr - 1) ir = main.nr - 1
     else ir = Math.floor(ird)
 
@@ -338,11 +330,9 @@ export class Go {
      *  Update the photon weight as well.
      ****/
   static recordT (main, Refl, photon, output) {
-    const x = photon.position.x
-    const y = photon.position.y
     let ir, ia // index to r & angle.
 
-    const ird = Math.sqrt(x * x + y * y) / main.dr
+    const ird = photon.position.r / main.dr
     if (ird > main.nr - 1) {
       ir = main.nr - 1
     } else {

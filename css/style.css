@@ -155,3 +155,38 @@ body {
 #cleargraphs:hover {
     background-color: rgba(200, 20, 20, 1);
 }
+
+#videoContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+#videoContainer .container {
+    width: 30%;
+    flex: 1 1 auto;
+    min-width: 300px;
+    max-width: 500px;
+    position: relative;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+#videoContainer .container .title {
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#videoContainer .container .video {
+    width: 100%;
+    height: auto;
+}
+
+#videoContainer .container .video * {
+    width: 100%;
+    height: auto;
+}

@@ -24,6 +24,7 @@ export class RunConfig {
     this.nz = nz
     this.nr = nr
     this.na = na
+    this.nt = 80
     this.layers = layers
 
     this.wth = 1e-4

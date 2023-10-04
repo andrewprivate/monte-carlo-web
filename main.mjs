@@ -111,6 +111,44 @@ runButton.addEventListener('click', async () => {
   resetRunButton()
 
   appendChartData(results)
+
+  const videoContainer = document.getElementById('videoContainer')
+  const container = document.createElement('div')
+  container.classList.add('container')
+
+  const title = document.createElement('div')
+  title.classList.add('title')
+  title.textContent = runConfig.name
+
+  const video = document.createElement('div')
+  video.classList.add('video')
+
+  container.appendChild(title)
+  container.appendChild(video)
+  videoContainer.appendChild(container)
+  syncVideos()
+  createVideo(results, video).then(url => {
+    const videoEl = document.createElement('video')
+    videoEl.src = url
+    videoEl.autoplay = true
+    videoEl.muted = true
+    video.replaceChildren(videoEl)
+
+    videoEl.addEventListener('ended', () => {
+      syncVideos()
+    })
+
+    const downloadBtn = document.createElement('button')
+    downloadBtn.textContent = 'Download Video'
+    downloadBtn.addEventListener('click', () => {
+      const a = document.createElement('a')
+      a.href = url
+      a.download = runConfig.name + '.webm'
+      a.click()
+    })
+    video.appendChild(downloadBtn)
+  })
+  console.log(results)
 })
 
 function resetRunButton () {
@@ -328,3 +366,111 @@ document.getElementById('cleargraphs').addEventListener('click', () => {
 })
 
 window.simulationRunner = simulationRunner
+
+async function createVideo (results, container) {
+  return new Promise((resolve, reject) => {
+    const w_txz = results.w_txz
+    const nr = results.config.nr
+    const nz = results.config.nz
+    const nt = results.config.nt
+    const dr = results.config.dr
+    const dz = results.config.dz
+
+    const scaleT = 40 // mseconds per frame
+
+    const canvas = document.createElement('canvas')
+
+    const scale = 800 / Math.max(nr * dr, nz * dz)
+
+    canvas.width = Math.ceil(nr * dr * scale)
+    canvas.height = Math.ceil(nz * dz * scale)
+
+    if (container) container.replaceChildren(canvas)
+
+    const ctx = canvas.getContext('2d')
+
+    const startTime = performance.now()
+    const stream = canvas.captureStream(30 /* fps */)
+    const mediaRecorder = new MediaRecorder(stream,
+      {
+        mimeType: 'video/webm; codecs=vp8'
+      })
+    const chunks = []
+
+    mediaRecorder.addEventListener('dataavailable', (e) => {
+      chunks.push(e.data)
+    })
+
+    mediaRecorder.addEventListener('stop', (e) => {
+      const blob = new Blob(chunks, {
+        type: 'video/webm'
+      })
+      const url = URL.createObjectURL(blob)
+      resolve(url)
+    })
+
+    const maxValue = 0.8 * w_txz.reduce((max, t_rz) => {
+      return Math.max(max, t_rz.reduce((max, r_z) => {
+        return Math.max(max, r_z.reduce((max, z) => {
+          return Math.max(max, z)
+        }, 0))
+      }, 0))
+    }, 0)
+
+    const gcolors = Pallete('tol-rainbow', 200).map((hex) => {
+      return '#' + hex
+    })
+    function render () {
+      const now = performance.now()
+      const elapsed = now - startTime
+      if (elapsed >= scaleT * nt) {
+        mediaRecorder.stop()
+        return
+      }
+      requestAnimationFrame(render)
+
+      const it = Math.floor(elapsed / scaleT)
+      const t_rz = w_txz[it]
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // draw layers
+      for (let i = 1; i < results.config.layers.length - 1; i++) {
+        const layer = results.config.layers[i]
+        const z0 = layer.z0
+        const z1 = layer.z1
+        ctx.fillStyle = colors[i % colors.length]
+        // opacity
+        ctx.globalAlpha = 0.5
+        ctx.fillRect(0, z0 * scale, canvas.width, (z1 - z0) * scale)
+      }
+      ctx.globalAlpha = 0.5
+
+      // draw photons
+      for (let ix = 0; ix < nr; ix++) {
+        for (let iz = 0; iz < nz; iz++) {
+          const value = t_rz[ix][iz]
+          if (value === 0) continue
+          const r = Math.log(value * (it + 1) + 1) / Math.log(maxValue + 1)
+
+          if (r > 0) {
+            ctx.fillStyle = gcolors[Math.min(Math.floor(r * gcolors.length), gcolors.length - 1)]
+            ctx.fillRect(ix * dr * scale, iz * dz * scale, dr * scale, dz * scale)
+          }
+        }
+      }
+    }
+
+    render()
+    mediaRecorder.start()
+  })
+}
+
+function syncVideos () {
+  const videoContainer = document.getElementById('videoContainer')
+  const videos = videoContainer.getElementsByTagName('video')
+  for (let i = 0; i < videos.length; i++) {
+    videos[i].currentTime = 0
+    videos[i].play()
+  }
+}
