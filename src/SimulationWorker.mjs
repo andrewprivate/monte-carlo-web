@@ -3,19 +3,23 @@ import { WorkerMessageHandler } from './WorkerMessageHander.mjs'
 
 const messageHandler = new WorkerMessageHandler(self)
 
-messageHandler.on('run', (config) => {
+let monteCarlo = null
+
+messageHandler.on('config', (config) => {
   const {
     runConfig,
-    numPhotons,
     seed
   } = config
+  monteCarlo = new MonteCarlo(runConfig, seed)
+})
 
-  const monteCarlo = new MonteCarlo(runConfig, seed)
-
+messageHandler.on('launch', (numPhotons) => {
   for (let i = 0; i < numPhotons; i++) {
     monteCarlo.launchPhoton()
   }
+})
 
+messageHandler.on('sendresult', () => {
   return monteCarlo.result
 })
 

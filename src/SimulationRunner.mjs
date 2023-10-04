@@ -5,20 +5,11 @@ import { OutputWriter } from './mcml/OutputWriter.mjs'
 import { MersenneTwister } from './mcml/Twister.mjs'
 
 const WorkerPath = new URL('SimulationWorker.mjs', import.meta.url)
-
-export class SimulationTask {
-  constructor (runConfig, numPhotons, seed) {
-    this.runConfig = runConfig
-    this.numPhotons = numPhotons
-    this.seed = seed
-  }
-}
-
 export class SimulationRunner {
   constructor () {
-    this.config = null
     this.workers = []
-    this.tasks = []
+    this.task = null
+    this.workerCount = navigator.hardwareConcurrency || 1
   }
 
   createWorker () {
@@ -38,85 +29,65 @@ export class SimulationRunner {
 
   initializeWorkers () {
     this.removeWorkers()
-    const numWorkers = navigator.hardwareConcurrency
+    const numWorkers = this.workerCount
     for (let i = 0; i < numWorkers; i++) {
       this.createWorker()
     }
   }
 
   reset () {
-    this.tasks = []
+    this.task = null
     this.initializeWorkers()
   }
 
-  setConfig (config) {
-    this.reset()
-    this.config = config
-    return this.config
-  }
+  async runSimulation (runConfig, progressCallback) {
+    if (this.task) throw new Error('Simulation is already running')
 
-  async runTask (task) {
-    return new Promise((resolve, reject) => {
-      this.tasks.push({
-        resolve,
-        task
-      })
-
-      this.run()
-    })
-  }
-
-  async run () {
-    if (this.tasks.length === 0) return
-
-    const worker = this.workers.find(worker => !worker.busy)
-    if (!worker) return
-
-    const task = this.tasks.shift()
-
-    worker.busy = true
-    const result = await worker.emit('run', task.task)
-    worker.busy = false
-
-    try {
-      task.resolve(result)
-    } catch (e) {
-      console.error('Task resolution throws error', task)
-      throw e
-    }
-
-    this.run()
-  }
-
-  async runSimulation (runIndex, progressCallback) {
     const seed = Math.floor(Math.random() * 0xffffffff)
     const random = new MersenneTwister(seed)
 
-    const run = this.config.runs[runIndex]
-    if (!run) {
-      throw new Error('Run index out of bounds')
+    const task = runConfig
+
+    this.task = task
+
+    const checkCancel = () => {
+      if (this.task !== task) throw new Error('Simulation cancelled')
     }
 
-    const tasks = []
-    const taskDivision = 5000
-    for (let i = 0; i < run.number_of_photons; i += taskDivision) {
-      const numPhotons = Math.min(taskDivision, run.number_of_photons - i)
-      tasks.push(new SimulationTask(run, numPhotons, random.genrand_int31()))
-    }
-
-    let progress = 0
-    const results = []
-
-    const timeStart = performance.now()
-
-    await Promise.all(tasks.map(async task => {
-      const result = await this.runTask(task)
-      progress += task.numPhotons
-      results.push(result)
-      if (progressCallback) progressCallback(results, progress, run.number_of_photons)
+    // Send config to workers
+    await Promise.all(this.workers.map(worker => {
+      return worker.emit('config', {
+        runConfig,
+        seed: random.genrand_int31()
+      })
     }))
 
+    checkCancel()
+
+    const taskDivision = 5000
+    const numPhotons = task.number_of_photons
+    let launched = 0
+    let launching = 0
+
+    const launchPhotons = async (worker) => {
+      while (launched + launching < numPhotons) {
+        const photons = Math.min(taskDivision, numPhotons - launched - launching)
+        launching += photons
+        await worker.emit('launch', photons)
+        checkCancel()
+        launched += photons
+        launching -= photons
+        if (progressCallback) progressCallback(launching, launched, numPhotons)
+      }
+    }
+
+    const timeStart = performance.now()
+    await Promise.all(this.workers.map(launchPhotons))
     const timeEnd = performance.now()
+
+    const results = await Promise.all(this.workers.map(worker => {
+      return worker.emit('sendresult')
+    }))
 
     const finalResult = results[0]
 
@@ -144,12 +115,16 @@ export class SimulationRunner {
       })
     }
 
-    OutputCalc.sumScaleResult(run, finalResult)
+    OutputCalc.sumScaleResult(runConfig, finalResult)
 
-    finalResult.rsp = Go.calculateRSpecular(run.layers)
+    finalResult.rsp = Go.calculateRSpecular(runConfig.layers)
 
     const output = new OutputWriter()
-    output.writeResult(run, finalResult)
+    output.writeResult(runConfig, finalResult)
+
+    checkCancel()
+    this.task = null
+
     return {
       results: finalResult,
       output: output.build()

@@ -9,6 +9,7 @@ const ChartsContainer = document.getElementById('charts')
 const ConfigInput = document.getElementById('configInput')
 
 const Charts = {}
+let Config = null
 
 const inputEditor = window.ace.edit('configInput')
 inputEditor.session.setOptions({
@@ -28,15 +29,15 @@ outputEditor.session.setMode(window.AceGrammar.getMode(Grammar))
 
 let selectedRun = 0
 
-function updateDropdown (config) {
+function updateDropdown () {
   const selectorContainer = document.getElementsByClassName('runSelector')[0]
   selectorContainer.replaceChildren()
 
-  const runs = config.runs.length
+  const runs = Config.runs.length
 
   const obj = {}
   for (let i = 0; i < runs; i++) {
-    const run = config.runs[i]
+    const run = Config.runs[i]
     if (!run.name) run.name = (run.output_file.split(/\s/)[0].replace('.mco', '') || ('Run ' + (i + 1))) + ' (' + run.number_of_photons + ' photons)'
     obj[i] = run.name
   }
@@ -44,7 +45,7 @@ function updateDropdown (config) {
   const el = Utils.createDropdown(0, 'Selected Run', obj, (val) => {
     selectedRun = parseInt(val)
   }, (val, newName) => {
-    const run = config.runs[parseInt(val)]
+    const run = Config.runs[parseInt(val)]
     run.name = newName
   })
   selectedRun = 0
@@ -63,11 +64,11 @@ inputEditor.session.addEventListener('change', () => {
 
 function parseConfig () {
   try {
-    const config = MonteCarloConfigParser.parseConfigFile(inputEditor.getValue())
+    Config = MonteCarloConfigParser.parseConfigFile(inputEditor.getValue())
     ConfigInput.classList.remove('error')
-    simulationRunner.setConfig(config)
+    simulationRunner.reset()
     resetRunButton()
-    updateDropdown(config)
+    updateDropdown()
   } catch (e) {
     console.error(e)
     ConfigInput.classList.add('error')
@@ -76,22 +77,33 @@ function parseConfig () {
 
 const runButton = document.getElementById('runbtn')
 runButton.addEventListener('click', async () => {
-  if (!runButton.classList.contains('clickable') || ConfigInput.classList.contains('error')) {
+  if (!runButton.classList.contains('clickable')) {
+    simulationRunner.reset()
+    resetRunButton()
     return
   }
 
-  runButton.classList.remove('clickable')
+  if (ConfigInput.classList.contains('error') || !Config) {
+    return
+  }
 
   const progress = runButton.getElementsByClassName('progress')[0]
   const text = runButton.getElementsByClassName('text')[0]
 
+  const runIndex = selectedRun
+  const runConfig = Config.runs[runIndex]
+
+  if (!runConfig) {
+    return
+  }
+
+  runButton.classList.remove('clickable')
   progress.style.width = '0%'
   text.textContent = 'Running...'
 
-  const runIndex = selectedRun
-  const { results, output } = await simulationRunner.runSimulation(runIndex, (results, completed, total) => {
-    text.textContent = `Simulated ${completed} / ${total} photons`
-    progress.style.width = `${(completed / total) * 100}%`
+  const { results, output } = await simulationRunner.runSimulation(runConfig, (launching, launched, total) => {
+    text.textContent = `Simulated ${launched} / ${total} photons`
+    progress.style.width = `${(launched / total) * 100}%`
   })
 
   outputEditor.setValue(output, -1)
@@ -105,7 +117,7 @@ function resetRunButton () {
   const progress = runButton.getElementsByClassName('progress')[0]
   const text = runButton.getElementsByClassName('text')[0]
   runButton.classList.add('clickable')
-  text.textContent = 'Run Simulation Using ' + simulationRunner.workers.length + ' Workers'
+  text.textContent = 'Run Simulation Using ' + simulationRunner.workerCount + ' Workers'
   progress.style.width = '100%'
 }
 
@@ -242,7 +254,7 @@ const colors = Pallete('tol', 10).map((hex) => {
 })
 
 function appendChartData (result) {
-  const runName = simulationRunner.config.runs[selectedRun].name
+  const runName = Config.runs[selectedRun].name
   const color = colors[Charts.fluence.dataset.length % colors.length]
   const fluenceData = []
   for (let i = 0; i < result.fluence.length; i++) {
