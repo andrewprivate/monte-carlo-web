@@ -32,10 +32,12 @@ export class Go {
   /***********************************************************
     *   Initialize a photon packet.
     ****/
-  static launchPhoton (rSpecular, layers, photon) {
-    photon.weight = 1 - rSpecular
+  static launchPhoton (main, photon) {
+    photon.weight = 1 - main.rSpecular
     photon.layer = 1
-    photon.velocity.z = 1
+    photon.uz = 1
+
+    this.updateLayer(main, photon)
   }
 
   /***********************************************************
@@ -77,9 +79,9 @@ export class Go {
  *      for pi-2pi sin(psi) is -
  ****/
   static spin (random, g, photon) {
-    const ux = photon.velocity.x
-    const uy = photon.velocity.y
-    const uz = photon.velocity.z
+    const ux = photon.ux
+    const uy = photon.uy
+    const uz = photon.uz
 
     /* cosine and sine of the */
     /* polar deflection angle theta. */
@@ -101,17 +103,17 @@ export class Go {
     }
 
     if (Math.abs(uz) > 1.0 - 1.0E-12) { /* normal incident. */
-      photon.velocity.x = sint * cosp
-      photon.velocity.y = sint * sinp
-      photon.velocity.z = cost * Math.sign(uz)
+      photon.ux = sint * cosp
+      photon.uy = sint * sinp
+      photon.uz = cost * Math.sign(uz)
       /* SIGN() is faster than division. */
     } else { /* regular incident. */
       const temp = Math.sqrt(1.0 - uz * uz)
-      photon.velocity.x = sint * (ux * uz * cosp - uy * sinp) /
+      photon.ux = sint * (ux * uz * cosp - uy * sinp) /
               temp + ux * cost
-      photon.velocity.y = sint * (uy * uz * cosp + ux * sinp) /
+      photon.uy = sint * (uy * uz * cosp + ux * sinp) /
               temp + uy * cost
-      photon.velocity.z = -sint * cosp * temp + uz * cost
+      photon.uz = -sint * cosp * temp + uz * cost
     }
   }
 
@@ -121,12 +123,12 @@ export class Go {
   static hop (photon) {
     const s = photon.stepSize
 
-    photon.position.x += s * photon.velocity.x
-    photon.position.y += s * photon.velocity.y
-    photon.position.z += s * photon.velocity.z
+    photon.x += s * photon.ux
+    photon.y += s * photon.uy
+    photon.z += s * photon.uz
 
-    // update the position.r hypotenuse
-    photon.position.r = Math.hypot(photon.position.x, photon.position.y)
+    // update the r hypotenuse
+    photon.r = Math.sqrt(photon.x * photon.x + photon.y * photon.y)
   }
 
   /***********************************************************
@@ -140,14 +142,13 @@ export class Go {
      ****/
   static stepSizeInGlass (main, photon) {
     let dl_b /* step size to boundary. */
-    const layer = main.layers[photon.layer]
-    const uz = photon.velocity.z
+    const uz = photon.uz
 
     /* Stepsize to the boundary. */
     if (uz > 0.0) {
-      dl_b = (layer.z1 - photon.position.z) / uz
+      dl_b = (photon.layerZ1 - photon.z) / uz
     } else if (uz < 0.0) {
-      dl_b = (layer.z0 - photon.position.z) / uz
+      dl_b = (photon.layerZ0 - photon.z) / uz
     } else { dl_b = 0.0 }
 
     photon.stepSize = dl_b
@@ -159,9 +160,8 @@ export class Go {
      * Otherwise, pick up the leftover in sleft.
      */
   static stepSizeInTissue (main, photon) {
-    const layer = main.layers[photon.layer]
-    const mua = layer.mua
-    const mus = layer.mus
+    const mua = photon.layerMua
+    const mus = photon.layerMus
 
     if (photon.stepSizeLeft === 0.0) { // Make a new step.
       let rnd
@@ -185,20 +185,19 @@ export class Go {
      */
   static hitBoundary (main, photon) {
     let dl_b // Length to boundary.
-    const layer = main.layers[photon.layer]
-    const uz = photon.velocity.z
+    const uz = photon.uz
     let hit
 
     // Calculate distance to the boundary.
     if (uz > 0.0) {
-      dl_b = (layer.z1 - photon.position.z) / uz // dl_b > 0.
+      dl_b = (photon.layerZ1 - photon.z) / uz // dl_b > 0.
     } else if (uz < 0.0) {
-      dl_b = (layer.z0 - photon.position.z) / uz // dl_b > 0.
+      dl_b = (photon.layerZ0 - photon.z) / uz // dl_b > 0.
     }
 
     if (uz !== 0.0 && photon.stepSize > dl_b) {
       // Not horizontal and crossing.
-      const mut = layer.mua + layer.mus
+      const mut = photon.layerMua + photon.layerMus
 
       photon.stepSizeLeft = (photon.stepSize - dl_b) * mut
       photon.stepSize = dl_b
@@ -217,18 +216,16 @@ export class Go {
      * The dropped weight is assigned to the absorption array elements.
      */
   static drop (main, photon, output) {
-    const layer = main.layers[photon.layer]
-
     // Compute array indices.
-    const izd = photon.position.z / main.dz
+    const izd = photon.z / main.dz
     const iz = Math.min(Math.floor(izd), main.nz - 1)
 
-    const ird = photon.position.r / main.dr
+    const ird = photon.r / main.dr
     const ir = Math.min(Math.floor(ird), main.nr - 1)
 
     // Update photon weight.
-    const mua = layer.mua
-    const mus = layer.mus
+    const mua = photon.layerMua
+    const mus = photon.layerMus
     const dwa = (photon.weight * mua) / (mua + mus)
     photon.weight -= dwa
 
@@ -308,11 +305,11 @@ export class Go {
   static recordR (main, Refl, photon, output) {
     let ir, ia
 
-    const ird = photon.position.r / main.dr
+    const ird = photon.r / main.dr
     if (ird > main.nr - 1) ir = main.nr - 1
     else ir = Math.floor(ird)
 
-    const iad = Math.acos(-photon.velocity.z) / main.da
+    const iad = Math.acos(-photon.uz) / main.da
     if (iad > main.na - 1) ia = main.na - 1
     else ia = Math.floor(iad)
 
@@ -332,14 +329,14 @@ export class Go {
   static recordT (main, Refl, photon, output) {
     let ir, ia // index to r & angle.
 
-    const ird = photon.position.r / main.dr
+    const ird = photon.r / main.dr
     if (ird > main.nr - 1) {
       ir = main.nr - 1
     } else {
       ir = Math.floor(ird)
     }
 
-    const iad = Math.acos(photon.velocity.z) / main.da
+    const iad = Math.acos(photon.uz) / main.da
     if (iad > main.na - 1) {
       ia = main.na - 1
     } else {
@@ -350,6 +347,15 @@ export class Go {
     output.tt_ra[ir][ia] += photon.weight * (1.0 - Refl)
 
     photon.weight *= Refl
+  }
+
+  // Cache layer properties in the photon for faster access.
+  static updateLayer (main, photon) {
+    const layer = main.layers[photon.layer]
+    photon.layerMua = layer.mua
+    photon.layerMus = layer.mus
+    photon.layerZ0 = layer.z0
+    photon.layerZ1 = layer.z1
   }
 
   /***********************************************************
@@ -372,7 +378,7 @@ export class Go {
  *Update the photon parmameters.
  ****/
   static crossUpOrNot (main, photon, output) {
-    const uz = photon.velocity.z /* z directional cosine. */
+    const uz = photon.uz /* z directional cosine. */
     let uz1/* cosines of transmission alpha. always */
     /* positive. */
     let r = 0.0/* reflectance */
@@ -391,18 +397,19 @@ export class Go {
 
     if (main.random.random() > r) { /* transmitted to layer-1. */
       if (layer === 1) {
-        photon.velocity.z = -uz1
+        photon.uz = -uz1
         this.recordR(main, 0, photon, output)
         photon.dead = true
       } else {
         photon.layer--
-        photon.velocity.x *= ni / nt
-        photon.velocity.y *= ni / nt
-        photon.velocity.z = -uz1
+        this.updateLayer(main, photon)
+        photon.ux *= ni / nt
+        photon.uy *= ni / nt
+        photon.uz = -uz1
       }
     } else {
       /* reflected. */
-      photon.velocity.z = -uz
+      photon.uz = -uz
     }
   }
 
@@ -419,7 +426,7 @@ export class Go {
  * Update the photon parmameters.
  ****/
   static crossDnOrNot (main, photon, output) {
-    const uz = photon.velocity.z /* z directional cosine. */
+    const uz = photon.uz /* z directional cosine. */
     let uz1 /* cosines of transmission alpha. */
     let r = 0.0 /* reflectance */
     const layer = photon.layer
@@ -437,25 +444,26 @@ export class Go {
 
     if (main.random.random() > r) { /* transmitted to layer+1. */
       if (layer === main.layers.length - 2) {
-        photon.velocity.z = uz1
+        photon.uz = uz1
         this.recordT(main, 0, photon, output)
         photon.dead = true
       } else {
         photon.layer++
-        photon.velocity.x *= ni / nt
-        photon.velocity.y *= ni / nt
-        photon.velocity.z = uz1
+        this.updateLayer(main, photon)
+        photon.ux *= ni / nt
+        photon.uy *= ni / nt
+        photon.uz = uz1
       }
     } else {
       /* reflected. */
-      photon.velocity.z = -uz
+      photon.uz = -uz
     }
   }
 
   /***********************************************************
  ****/
   static crossOrNot (main, photon, output) {
-    if (photon.velocity.z < 0.0) {
+    if (photon.uz < 0.0) {
       this.crossUpOrNot(main, photon, output)
     } else {
       this.crossDnOrNot(main, photon, output)
@@ -468,7 +476,7 @@ export class Go {
      *  never interact with tissue again.
      ****/
   static hopInGlass (main, photon, output) {
-    if (photon.velocity.z === 0.0) {
+    if (photon.uz === 0.0) {
       /* horizontal photon in glass is killed. */
       photon.dead = true
     } else {

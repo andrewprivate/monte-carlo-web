@@ -43,14 +43,14 @@ export class MonteCarlo {
     const photon = new PhotonPacket()
 
     // Initialize the photon packet.
-    Go.launchPhoton(this.rSpecular, this.layers, photon)
+    Go.launchPhoton(this, photon)
 
     let tick = 0
     while (!photon.dead) {
       Go.hopDropSpin(this, photon, this.result)
       if (tick < this.nt) {
-        const ix = Math.round(photon.position.x / this.dr) + this.nr
-        const iz = Math.floor(photon.position.z / this.dz)
+        const ix = Math.round(photon.x / this.dr) + this.nr
+        const iz = Math.floor(photon.z / this.dz)
         if (ix >= 0 && ix < this.nr * 2 && iz < this.nz) {
           this.result.w_txz[tick][ix][iz] += photon.weight
         }
