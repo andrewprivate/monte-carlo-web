@@ -170,7 +170,7 @@ export class Go {
         rnd = main.random.random()
       } while (rnd <= 0.0) // Avoid zero.
 
-      photon.stepSize = -Math.log(rnd) / (mua + mus)
+      photon.stepSize = -Math.log(rnd) / (mus)
     } else { // Take the leftover.
       photon.stepSize = photon.stepSizeLeft / (mua + mus)
       photon.stepSizeLeft = 0.0
@@ -225,8 +225,7 @@ export class Go {
 
     // Update photon weight.
     const mua = photon.layerMua
-    const mus = photon.layerMus
-    const dwa = (photon.weight * mua) / (mua + mus)
+    const dwa = photon.weight * (1 - Math.exp(-mua * photon.stepSize))
     photon.weight -= dwa
 
     // Assign dwa to the absorption array element.
