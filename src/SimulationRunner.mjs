@@ -28,7 +28,6 @@ export class SimulationRunner {
   }
 
   initializeWorkers () {
-    this.removeWorkers()
     const numWorkers = this.workerCount
     for (let i = 0; i < numWorkers; i++) {
       this.createWorker()
@@ -36,12 +35,19 @@ export class SimulationRunner {
   }
 
   reset () {
-    this.task = null
+    this.cancelSimulation()
     this.initializeWorkers()
+  }
+
+  cancelSimulation () {
+    this.task = null
+    this.removeWorkers()
   }
 
   async runSimulation (runConfig, progressCallback) {
     if (this.task) throw new Error('Simulation is already running')
+
+    this.reset()
 
     const seed = Math.floor(Math.random() * 0xffffffff)
     const random = new MersenneTwister(seed)
@@ -54,6 +60,8 @@ export class SimulationRunner {
       if (this.task !== task) throw new Error('Simulation cancelled')
     }
 
+    console.log('Sending config to workers')
+    let now = performance.now()
     // Send config to workers
     await Promise.all(this.workers.map(worker => {
       return worker.emit('config', {
@@ -61,9 +69,10 @@ export class SimulationRunner {
         seed: random.genrand_int31()
       })
     }))
-
     checkCancel()
 
+    console.log('Config sent to workers in', performance.now() - now, 'ms')
+    console.log('Launching photons')
     const taskDivision = 5000
     const numPhotons = task.number_of_photons
     let launched = 0
@@ -80,53 +89,91 @@ export class SimulationRunner {
         if (progressCallback) progressCallback(launching, launched, numPhotons)
       }
     }
-
     const timeStart = performance.now()
     await Promise.all(this.workers.map(launchPhotons))
     const timeEnd = performance.now()
+
+    console.log('Photon simulation finished in', timeEnd - timeStart, 'ms')
+    console.log('Collecting results')
+    now = performance.now()
 
     const results = await Promise.all(this.workers.map(worker => {
       return worker.emit('sendresult')
     }))
 
-    const finalResult = results[0]
+    console.log('Results collected in', performance.now() - now, 'ms')
+    console.log('Summing results')
+    now = performance.now()
 
-    finalResult.simulationTime = (timeEnd - timeStart) / 1000
+    const summedResults = results[0]
 
     for (let i = 1; i < results.length; i++) {
       const result = results[i]
 
-      result.tt_ra.forEach((rows, i) => {
-        rows.forEach((value, j) => {
-          finalResult.tt_ra[i][j] += value
-        })
+      result.tt_ra.forEach((value, i) => {
+        summedResults.tt_ra[i] += value
       })
 
-      result.rd_ra.forEach((rows, i) => {
-        rows.forEach((value, j) => {
-          finalResult.rd_ra[i][j] += value
-        })
+      result.rd_ra.forEach((value, i) => {
+        summedResults.rd_ra[i] += value
       })
 
-      result.a_rz.forEach((rows, i) => {
-        rows.forEach((value, j) => {
-          finalResult.a_rz[i][j] += value
-        })
+      result.a_rz.forEach((value, i) => {
+        summedResults.a_rz[i] += value
+      })
+
+      result.w_txz.forEach((value, i) => {
+        summedResults.w_txz[i] += value
       })
     }
 
-    OutputCalc.sumScaleResult(runConfig, finalResult)
+    console.log('Results summed in', performance.now() - now, 'ms')
+    console.log('Unflattening results')
+    now = performance.now()
 
-    finalResult.rsp = Go.calculateRSpecular(runConfig.layers)
+    // unflatten results
+    const finalResults = {
+      tt_ra: new Array(runConfig.nr),
+      rd_ra: new Array(runConfig.nr),
+      a_rz: new Array(runConfig.nr),
+      w_txz: new Array(runConfig.nt)
+    }
+
+    for (let i = 0; i < runConfig.nr; i++) {
+      finalResults.tt_ra[i] = summedResults.tt_ra.slice(i * runConfig.na, (i + 1) * runConfig.na)
+      finalResults.rd_ra[i] = summedResults.rd_ra.slice(i * runConfig.na, (i + 1) * runConfig.na)
+      finalResults.a_rz[i] = summedResults.a_rz.slice(i * runConfig.nz, (i + 1) * runConfig.nz)
+    }
+
+    for (let i = 0; i < runConfig.nt; i++) {
+      finalResults.w_txz[i] = new Array(runConfig.nr * 2)
+      for (let j = 0; j < runConfig.nr * 2; j++) {
+        finalResults.w_txz[i][j] = summedResults.w_txz.slice(i * runConfig.nr * 2 * runConfig.nz + j * runConfig.nz, i * runConfig.nr * 2 * runConfig.nz + (j + 1) * runConfig.nz)
+      }
+    }
+
+    console.log('Results unflattened in', performance.now() - now, 'ms')
+    console.log('Calculating final results')
+    now = performance.now()
+
+    OutputCalc.sumScaleResult(runConfig, finalResults)
+
+    finalResults.simulationTime = (timeEnd - timeStart) / 1000
+
+    finalResults.rsp = Go.calculateRSpecular(runConfig.layers)
 
     const output = new OutputWriter()
-    output.writeResult(runConfig, finalResult)
+    output.writeResult(runConfig, finalResults)
+
+    console.log('Final results calculated in', performance.now() - now, 'ms')
 
     checkCancel()
+
     this.task = null
+    this.removeWorkers()
 
     return {
-      results: finalResult,
+      results: finalResults,
       output: output.build()
     }
   }

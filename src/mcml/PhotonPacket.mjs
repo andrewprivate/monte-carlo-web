@@ -1,9 +1,13 @@
-import { Vec3d } from '../Vec3d.mjs'
-
 export class PhotonPacket {
   constructor () {
-    this.position = new Vec3d(0, 0, 0)
-    this.velocity = new Vec3d(0, 0, 0)
+    this.x = 0
+    this.y = 0
+    this.z = 0
+    this.r = 0
+
+    this.ux = 0
+    this.uy = 0
+    this.uz = 0
 
     this.weight = 0
     this.stepSize = 0
@@ -11,15 +15,11 @@ export class PhotonPacket {
     this.scatters = 0
     this.layer = 0
 
-    this._dead = false
-  }
+    this.layerMua = 0
+    this.layerMus = 0
+    this.layerZ0 = 0
+    this.layerZ1 = 0
 
-  get dead () {
-    return this._dead
-  }
-
-  set dead (value) {
-    // throw new Error('PhotonPacket.dead is read-only')
-    this._dead = value
+    this.dead = false
   }
 }

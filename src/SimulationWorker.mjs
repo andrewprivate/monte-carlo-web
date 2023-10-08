@@ -1,26 +1,54 @@
-import { MonteCarlo } from './MonteCarlo.mjs'
 import { WorkerMessageHandler } from './WorkerMessageHander.mjs'
+import init, { Simulation } from '../rust/pkg/MonteCarloRS.js'
 
 const messageHandler = new WorkerMessageHandler(self)
+let monteCarloSimulator
 
-let monteCarlo = null
+messageHandler.on('config', async (config) => {
+  await init()
 
-messageHandler.on('config', (config) => {
+  if (monteCarloSimulator) {
+    monteCarloSimulator.free()
+  }
+
+  monteCarloSimulator = Simulation.new()
+
   const {
     runConfig,
     seed
   } = config
-  monteCarlo = new MonteCarlo(runConfig, seed)
+
+  monteCarloSimulator.configure_run(
+    runConfig.dz,
+    runConfig.dr,
+    runConfig.da,
+    runConfig.nz,
+    runConfig.nr,
+    runConfig.na,
+    runConfig.nt,
+    runConfig.wth,
+    runConfig.chance
+  )
+  monteCarloSimulator.set_seed(BigInt(seed))
+
+  runConfig.layers.forEach(layer => {
+    monteCarloSimulator.add_layer(layer.n, layer.mua, layer.mus, layer.g, layer.d)
+  })
+
+  monteCarloSimulator.initialize()
 })
 
 messageHandler.on('launch', (numPhotons) => {
-  for (let i = 0; i < numPhotons; i++) {
-    monteCarlo.launchPhoton()
-  }
+  monteCarloSimulator.launch_photons(numPhotons)
 })
 
 messageHandler.on('sendresult', () => {
-  return monteCarlo.result
-})
+  const results = {
+    tt_ra: monteCarloSimulator.get_tt_ra(),
+    rd_ra: monteCarloSimulator.get_rd_ra(),
+    a_rz: monteCarloSimulator.get_a_rz(),
+    w_txz: monteCarloSimulator.get_w_txz()
+  }
 
-console.log('worker loaded')
+  return results
+})

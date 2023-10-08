@@ -66,7 +66,7 @@ function parseConfig () {
   try {
     Config = MonteCarloConfigParser.parseConfigFile(inputEditor.getValue())
     ConfigInput.classList.remove('error')
-    simulationRunner.reset()
+    simulationRunner.cancelSimulation()
     resetRunButton()
     updateDropdown()
   } catch (e) {
@@ -78,7 +78,7 @@ function parseConfig () {
 const runButton = document.getElementById('runbtn')
 runButton.addEventListener('click', async () => {
   if (!runButton.classList.contains('clickable')) {
-    simulationRunner.reset()
+    simulationRunner.cancelSimulation()
     resetRunButton()
     return
   }

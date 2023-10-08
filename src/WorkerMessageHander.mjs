@@ -38,6 +38,8 @@ export class WorkerMessageHandler {
           throw error
         }
       }))
+    } else {
+      console.warn('No listeners for event', event)
     }
 
     this.channel.postMessage({
