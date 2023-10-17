@@ -58,28 +58,33 @@ export class OutputCalc {
     const na = runConfig.na
     const dr = runConfig.dr
     const da = runConfig.da
+    const { PI, sin } = Math
     const n_photons = runConfig.number_of_photons
     let scale1, scale2
 
-    scale1 = 4.0 * Math.PI * Math.PI * dr * dr * Math.sin(da / 2.0) * n_photons
+    scale1 = 4.0 * PI * PI * dr * sin(da / 2.0) * dr * n_photons
+    /* The factor (ir+0.5)*sin(2a) to be added. */
     for (let ir = 0; ir < nr; ir++) {
       for (let ia = 0; ia < na; ia++) {
-        scale2 = 1.0 / ((ir + 0.5) * Math.sin(2.0 * (ia + 0.5) * da) * scale1)
+        scale2 = 1.0 / ((ir + 0.5) * sin(2.0 * (ia + 0.5) * da) * scale1)
         results.rd_ra[ir][ia] *= scale2
         results.tt_ra[ir][ia] *= scale2
       }
     }
 
-    scale1 = 2.0 * Math.PI * dr * dr * n_photons
+    scale1 = 2.0 * PI * dr * dr * n_photons
+    /* area is 2*PI*[(ir+0.5)*dr]*dr. */
+    /* ir+0.5 to be added. */
     for (let ir = 0; ir < nr; ir++) {
       scale2 = 1.0 / ((ir + 0.5) * scale1)
       results.rd_r[ir] *= scale2
       results.tt_r[ir] *= scale2
     }
 
-    scale1 = 2.0 * Math.PI * da * n_photons
+    scale1 = 2.0 * PI * da * n_photons
+    /* solid angle is 2*PI*sin(a)*da. sin(a) to be added. */
     for (let ia = 0; ia < na; ia++) {
-      scale2 = 1.0 / (Math.sin((ia + 0.5) * da) * scale1)
+      scale2 = 1.0 / (sin((ia + 0.5) * da) * scale1)
       results.rd_a[ia] *= scale2
       results.tt_a[ia] *= scale2
     }
@@ -94,10 +99,11 @@ export class OutputCalc {
     const nz = runConfig.nz
     const dr = runConfig.dr
     const dz = runConfig.dz
+    const { PI } = Math
     const n_photons = runConfig.number_of_photons
     let scale1
 
-    scale1 = 2.0 * Math.PI * dr * dr * dz * n_photons
+    scale1 = 2.0 * PI * dr * dr * dz * n_photons
     for (let iz = 0; iz < nz; iz++) {
       for (let ir = 0; ir < nr; ir++) {
         results.a_rz[ir][iz] /= (ir + 0.5) * scale1
@@ -152,6 +158,9 @@ export class OutputCalc {
     this.scaleRdTt(runConfig, results)
     this.scaleA(runConfig, results)
     this.scaleW(runConfig, results)
+
+    results.rd_unscattered /= runConfig.number_of_photons
+    results.tt_unscattered /= runConfig.number_of_photons
 
     // calculate fluence
     const fluence = new Float64Array(runConfig.nz)

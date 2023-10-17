@@ -140,6 +140,8 @@ pub fn spin(main: &mut Simulation, g: f64, photon: &mut PhotonPacket) {
         photon.uy = sint * (uy * uz * cosp + ux * sinp) / temp + uy * cost;
         photon.uz = -sint * cosp * temp + uz * cost;
     }
+
+    photon.scatters += 1;
 }
 
 /***********************************************************
@@ -332,15 +334,19 @@ pub fn record_r(main: &mut Simulation, refl: f64, photon: &mut PhotonPacket) {
         ir = ird;
     }
 
-    let iad: usize = ((photon.uz).acos() / main.run_config.da) as usize;
+    let iad: usize = ((-photon.uz).acos() / main.run_config.da) as usize;
     if iad > main.run_config.na - 1 {
         ia = main.run_config.na - 1;
     } else {
         ia = iad;
     }
 
-    // Assign photon to the reflection array element.
-    main.results.rd_ra[ir * main.run_config.na + ia] += photon.weight * (1.0 - refl);
+    if photon.scatters > 0 {
+        // Assign photon to the reflection array element.
+        main.results.rd_ra[ir * main.run_config.na + ia] += photon.weight * (1.0 - refl);
+    } else {
+        main.results.rd_unscattered += photon.weight * (1.0 - refl);
+    }
 
     photon.weight *= refl;
 }
@@ -370,8 +376,12 @@ pub fn record_t(main: &mut Simulation, refl: f64, photon: &mut PhotonPacket) {
         ia = iad;
     }
 
-    // Assign photon to the transmittance array element.
-    main.results.tt_ra[ir * main.run_config.na + ia] += photon.weight * (1.0 - refl);
+    if photon.scatters > 0 {
+        // Assign photon to the transmittance array element.
+        main.results.tt_ra[ir * main.run_config.na + ia] += photon.weight * (1.0 - refl);
+    } else {
+        main.results.tt_unscattered += photon.weight * (1.0 - refl);
+    }
 
     photon.weight *= refl;
 }

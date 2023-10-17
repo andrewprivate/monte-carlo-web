@@ -295,11 +295,17 @@ function initializeCharts () {
   Charts.absorbance = createLineChart('Absorbance Over Depth', 'Depth (cm)', 'Absorbance (-)')
   ChartsContainer.appendChild(Charts.absorbance.container)
 
-  Charts.reflectance = createLineChart('Diffuse Reflectance Over Distance', 'Distance (cm)', 'Reflectance (-)')
+  Charts.reflectance = createLineChart('Diffused Reflectance Over Distance', 'Distance (cm)', 'Diffused Reflectance (-)')
   ChartsContainer.appendChild(Charts.reflectance.container)
 
-  Charts.transmittance = createLineChart('Transmittance Over Distance', 'Distance (cm)', 'Transmittance (-)')
+  Charts.transmittance = createLineChart('Diffused Transmittance Over Distance', 'Distance (cm)', 'Diffused Transmittance (-)')
   ChartsContainer.appendChild(Charts.transmittance.container)
+
+  Charts.reflectanceAngle = createLineChart('Diffused Reflectance Over Exit Angle', 'Exit Angle (rad * PI)', 'Diffused Reflectance (1/sr)')
+  ChartsContainer.appendChild(Charts.reflectanceAngle.container)
+
+  Charts.transmittanceAngle = createLineChart('Diffused Transmittance Over Exit Angle', 'Exit Angle (rad * PI)', 'Diffused Transmittance (1/sr)')
+  ChartsContainer.appendChild(Charts.transmittanceAngle.container)
 }
 
 const colors = Pallete('tol', 10).map((hex) => {
@@ -311,6 +317,7 @@ function appendChartData (result) {
   const color = colors[Charts.fluence.dataset.length % colors.length]
   const fluenceData = []
   for (let i = 0; i < result.fluence.length; i++) {
+    if (!result.fluence[i]) continue
     const z = result.config.dz * (i + 0.5)
     fluenceData.push({
       x: z,
@@ -327,6 +334,7 @@ function appendChartData (result) {
 
   const absorbanceData = []
   for (let i = 0; i < result.a_z.length; i++) {
+    if (!result.a_z[i]) continue
     const z = result.config.dz * (i + 0.5)
     absorbanceData.push({
       x: z,
@@ -343,6 +351,7 @@ function appendChartData (result) {
 
   const reflectanceData = []
   for (let i = 0; i < result.rd_r.length; i++) {
+    if (!result.rd_r[i]) continue
     const r = result.config.dr * (i + 0.5)
     reflectanceData.push({
       x: r,
@@ -359,6 +368,7 @@ function appendChartData (result) {
 
   const transmittanceData = []
   for (let i = 0; i < result.tt_r.length; i++) {
+    if (!result.tt_r[i]) continue
     const r = result.config.dr * (i + 0.5)
     transmittanceData.push({
       x: r,
@@ -369,6 +379,40 @@ function appendChartData (result) {
   Charts.transmittance.appendData({
     label: runName,
     data: transmittanceData,
+    borderColor: color,
+    backgroundColor: color
+  })
+
+  const reflectanceAngleData = []
+  for (let i = 0; i < result.rd_a.length; i++) {
+    if (!result.rd_a[i]) continue
+    const a = result.config.da * (i + 0.5) / Math.PI
+    reflectanceAngleData.push({
+      x: a,
+      y: result.rd_a[i]
+    })
+  }
+
+  Charts.reflectanceAngle.appendData({
+    label: runName,
+    data: reflectanceAngleData,
+    borderColor: color,
+    backgroundColor: color
+  })
+
+  const transmittanceAngleData = []
+  for (let i = 0; i < result.tt_a.length; i++) {
+    if (!result.tt_a[i]) continue
+    const a = result.config.da * (i + 0.5) / Math.PI
+    transmittanceAngleData.push({
+      x: a,
+      y: result.tt_a[i]
+    })
+  }
+
+  Charts.transmittanceAngle.appendData({
+    label: runName,
+    data: transmittanceAngleData,
     borderColor: color,
     backgroundColor: color
   })

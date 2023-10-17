@@ -125,6 +125,9 @@ export class SimulationRunner {
       result.w_txz.forEach((value, i) => {
         summedResults.w_txz[i] += value
       })
+
+      summedResults.tt_unscattered += result.tt_unscattered
+      summedResults.rd_unscattered += result.rd_unscattered
     }
 
     console.log('Results summed in', performance.now() - now, 'ms')
@@ -136,7 +139,9 @@ export class SimulationRunner {
       tt_ra: new Array(runConfig.nr),
       rd_ra: new Array(runConfig.nr),
       a_rz: new Array(runConfig.nr),
-      w_txz: new Array(runConfig.nt)
+      w_txz: new Array(runConfig.nt),
+      tt_unscattered: summedResults.tt_unscattered,
+      rd_unscattered: summedResults.rd_unscattered
     }
 
     for (let i = 0; i < runConfig.nr; i++) {

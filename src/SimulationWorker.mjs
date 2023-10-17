@@ -47,7 +47,9 @@ messageHandler.on('sendresult', () => {
     tt_ra: monteCarloSimulator.get_tt_ra(),
     rd_ra: monteCarloSimulator.get_rd_ra(),
     a_rz: monteCarloSimulator.get_a_rz(),
-    w_txz: monteCarloSimulator.get_w_txz()
+    w_txz: monteCarloSimulator.get_w_txz(),
+    tt_unscattered: monteCarloSimulator.get_tt_unscattered(),
+    rd_unscattered: monteCarloSimulator.get_rd_unscattered()
   }
 
   return results

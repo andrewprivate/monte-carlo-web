@@ -12,6 +12,8 @@ pub struct Results {
     rd_ra: Vec<f64>,
     a_rz: Vec<f64>,
     w_txz: Vec<f64>,
+    rd_unscattered: f64,
+    tt_unscattered: f64,
 }
 
 #[wasm_bindgen]
@@ -28,6 +30,8 @@ impl Simulation {
         self.results.rd_ra = vec![0.0; self.run_config.na * self.run_config.nr];
         self.results.a_rz = vec![0.0; self.run_config.nz * self.run_config.nr];
         self.results.w_txz = vec![0.0; self.run_config.nz * self.run_config.nr * 2 * self.run_config.nt];
+        self.results.rd_unscattered = 0.0;
+        self.results.tt_unscattered = 0.0;
     }
 }
 
@@ -43,6 +47,8 @@ impl Simulation {
                 rd_ra: Vec::new(),
                 a_rz: Vec::new(),
                 w_txz: Vec::new(),
+                rd_unscattered: 0.0,
+                tt_unscattered: 0.0,
             },
         }
     }
@@ -138,5 +144,13 @@ impl Simulation {
 
     pub fn get_r_specular(&self) -> f64 {
         self.r_specular
+    }
+
+    pub fn get_rd_unscattered(&self) -> f64 {
+        self.results.rd_unscattered
+    }
+
+    pub fn get_tt_unscattered(&self) -> f64 {
+        self.results.tt_unscattered
     }
 }

@@ -162,6 +162,20 @@ export class Simulation {
         const ret = wasm.simulation_get_r_specular(this.__wbg_ptr);
         return ret;
     }
+    /**
+    * @returns {number}
+    */
+    get_rd_unscattered() {
+        const ret = wasm.simulation_get_rd_unscattered(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @returns {number}
+    */
+    get_tt_unscattered() {
+        const ret = wasm.simulation_get_tt_unscattered(this.__wbg_ptr);
+        return ret;
+    }
 }
 
 async function __wbg_load(module, imports) {

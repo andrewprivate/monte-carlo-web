@@ -16,6 +16,7 @@ pub struct PhotonPacket {
     pub step_size_left: f64,
 
     pub layer: usize,
+    pub scatters: i64,
     pub dead: bool,
 
     // Cached layer properties
@@ -40,6 +41,7 @@ impl PhotonPacket {
             step_size: 0.0,
             step_size_left: 0.0,
             layer: 0,
+            scatters: 0,
             dead: false,
             layer_mua: 0.0,
             layer_mus: 0.0,
