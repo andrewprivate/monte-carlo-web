@@ -56,7 +56,17 @@ pub fn update_layer(main: &Simulation, photon: &mut PhotonPacket) {
 pub fn launch_photon(main: &Simulation, photon: &mut PhotonPacket) {
     photon.weight = 1.0 - main.r_specular;
     photon.layer = 1;
-    photon.uz = 1.0;
+
+    let n1 = main.run_config.layers[0].n;
+    let n2 = main.run_config.layers[photon.layer].n;
+    let n_rel = n2 / n1;
+    let alphai = main.run_config.alpha;
+    
+    
+    // use snells law
+    let alphat = (alphai.to_radians().sin() / n_rel).asin();
+    photon.ux = alphat.sin();
+    photon.uz = alphat.cos();
 
     update_layer(main, photon);
 }
@@ -341,9 +351,13 @@ pub fn record_r(main: &mut Simulation, refl: f64, photon: &mut PhotonPacket) {
         ia = iad;
     }
 
+    // clamp ix to 0 and nr*2
+    let ix = (((photon.x / main.run_config.dr).round() as i64) + (main.run_config.nr as i64)).max(0).min((main.run_config.nr * 2 - 1) as i64) as usize;
+
     if photon.scatters > 0 {
         // Assign photon to the reflection array element.
         main.results.rd_ra[ir * main.run_config.na + ia] += photon.weight * (1.0 - refl);
+        main.results.rd_x[ix] += photon.weight * (1.0 - refl);
     } else {
         main.results.rd_unscattered += photon.weight * (1.0 - refl);
     }

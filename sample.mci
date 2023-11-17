@@ -6,11 +6,12 @@
 ####
 
 1.0						# file version
-5						# number of runs
+6						# number of runs
 
 ### Specify data for run 1
 example.mco	A				# output filename, ASCII/Binary
 1000000						# No. of photons
+0							# Incident angle
 0.01	0.01					# dz, dr
 40	50	30	50			# No. of dz, dr, da, t
 
@@ -25,6 +26,7 @@ example.mco	A				# output filename, ASCII/Binary
 ### Specify data for run 2
 table3.2.mco A				# output filename, ASCII/Binary
 5000						# No. of photons
+0							# Incident angle
 0.001	0.001					# dz, dr
 200	200	30	50			# No. of dz, dr, da, t
 
@@ -37,6 +39,7 @@ table3.2.mco A				# output filename, ASCII/Binary
 ### Specify data for run 3
 n_rel=1.mco A				# output filename, ASCII/Binary
 1000000						# No. of photons
+0							# Incident angle
 0.005	0.005					# dz, dr
 200	200	30	80			# No. of dz, dr, da, t
 
@@ -49,6 +52,7 @@ n_rel=1.mco A				# output filename, ASCII/Binary
 ### Specify data for run 4
 n_rel=1.37.mco A				# output filename, ASCII/Binary
 1000000						# No. of photons
+0							# Incident angle
 0.005	0.005					# dz, dr
 200	200	30	80			# No. of dz, dr, da, t
 
@@ -58,9 +62,10 @@ n_rel=1.37.mco A				# output filename, ASCII/Binary
 1.37	0.1	100	0.90	1		# layer 1
 1.0						# n for medium below.
 
-### Specify data for run 4
+### Specify data for run 5
 figure3.4.mco A				# output filename, ASCII/Binary
 5000000						# No. of photons
+0							# Incident angle
 0.0001	0.001					# dz, dr
 200	200	30	80			# No. of dz, dr, da, t
 
@@ -68,4 +73,17 @@ figure3.4.mco A				# output filename, ASCII/Binary
 # n	mua	mus	g	d		# One line for each layer
 1.0						# n for medium above.
 1.0	10	90	0.75	0.02		# layer 1
+1.0						# n for medium below.
+
+### Specify data for run 2
+fig7.5.mco	A				# output filename, ASCII/Binary
+2000000						# No. of photons
+45							# Incident angle
+0.01	0.01					# dz, dr
+200	300	200	50			# No. of dz, dr, da, t
+
+1						# No. of layers
+# n	mua	mus	g	d		# One line for each layer
+1.0						# n for medium above.
+1.33	0.25	20	0.853	2		# layer 1
 1.0						# n for medium below.

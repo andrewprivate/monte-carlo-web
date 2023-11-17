@@ -77,6 +77,7 @@ export class Simulation {
         return Simulation.__wrap(ret);
     }
     /**
+    * @param {number} alpha
     * @param {number} dz
     * @param {number} dr
     * @param {number} da
@@ -87,8 +88,8 @@ export class Simulation {
     * @param {number} wth
     * @param {number} chance
     */
-    configure_run(dz, dr, da, nz, nr, na, nt, wth, chance) {
-        wasm.simulation_configure_run(this.__wbg_ptr, dz, dr, da, nz, nr, na, nt, wth, chance);
+    configure_run(alpha, dz, dr, da, nz, nr, na, nt, wth, chance) {
+        wasm.simulation_configure_run(this.__wbg_ptr, alpha, dz, dr, da, nz, nr, na, nt, wth, chance);
     }
     /**
     * @param {bigint} seed
@@ -139,6 +140,13 @@ export class Simulation {
     */
     get_rd_ra() {
         const ret = wasm.simulation_get_rd_ra(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
+    * @returns {Float64Array}
+    */
+    get_rd_x() {
+        const ret = wasm.simulation_get_rd_x(this.__wbg_ptr);
         return takeObject(ret);
     }
     /**

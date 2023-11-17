@@ -118,6 +118,10 @@ export class SimulationRunner {
         summedResults.rd_ra[i] += value
       })
 
+      result.rd_x.forEach((value, i) => {
+        summedResults.rd_x[i] += value
+      })
+
       result.a_rz.forEach((value, i) => {
         summedResults.a_rz[i] += value
       })
@@ -138,6 +142,7 @@ export class SimulationRunner {
     const finalResults = {
       tt_ra: new Array(runConfig.nr),
       rd_ra: new Array(runConfig.nr),
+      rd_x: summedResults.rd_x,
       a_rz: new Array(runConfig.nr),
       w_txz: new Array(runConfig.nt),
       tt_unscattered: summedResults.tt_unscattered,

@@ -19,6 +19,7 @@ messageHandler.on('config', async (config) => {
   } = config
 
   monteCarloSimulator.configure_run(
+    runConfig.incident_angle,
     runConfig.dz,
     runConfig.dr,
     runConfig.da,
@@ -46,6 +47,7 @@ messageHandler.on('sendresult', () => {
   const results = {
     tt_ra: monteCarloSimulator.get_tt_ra(),
     rd_ra: monteCarloSimulator.get_rd_ra(),
+    rd_x: monteCarloSimulator.get_rd_x(),
     a_rz: monteCarloSimulator.get_a_rz(),
     w_txz: monteCarloSimulator.get_w_txz(),
     tt_unscattered: monteCarloSimulator.get_tt_unscattered(),
