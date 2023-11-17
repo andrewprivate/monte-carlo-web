@@ -43,6 +43,7 @@ export const Grammar = {
         'A_l',
         'A_z',
         'Rd_r',
+        'Rd_x',
         'Rd_a',
         'Tt_r',
         'Tt_a',

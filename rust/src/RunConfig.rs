@@ -33,6 +33,7 @@ impl Layer {
 }
 
 pub struct RunConfig {
+    pub alpha: f64,        // Incident angle in degrees
     pub dz: f64,        // Step size in z
     pub dr: f64,        // Step size in r
     pub da: f64,        // Step size in angle
@@ -51,6 +52,7 @@ pub struct RunConfig {
 impl RunConfig {
     pub fn new() -> RunConfig {
         RunConfig {
+            alpha: 0.0,
             dz: 0.0,
             dr: 0.0,
             da: 0.0,

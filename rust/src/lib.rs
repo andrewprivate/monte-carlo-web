@@ -10,6 +10,7 @@ mod RunConfig;
 pub struct Results {
     tt_ra: Vec<f64>,
     rd_ra: Vec<f64>,
+    rd_x: Vec<f64>,
     a_rz: Vec<f64>,
     w_txz: Vec<f64>,
     rd_unscattered: f64,
@@ -28,6 +29,7 @@ impl Simulation {
     fn initialize_results(&mut self) {
         self.results.tt_ra = vec![0.0; self.run_config.na * self.run_config.nr];
         self.results.rd_ra = vec![0.0; self.run_config.na * self.run_config.nr];
+        self.results.rd_x = vec![0.0; self.run_config.nr * 2];
         self.results.a_rz = vec![0.0; self.run_config.nz * self.run_config.nr];
         self.results.w_txz = vec![0.0; self.run_config.nz * self.run_config.nr * 2 * self.run_config.nt];
         self.results.rd_unscattered = 0.0;
@@ -45,6 +47,7 @@ impl Simulation {
             results: Results {
                 tt_ra: Vec::new(),
                 rd_ra: Vec::new(),
+                rd_x: Vec::new(),
                 a_rz: Vec::new(),
                 w_txz: Vec::new(),
                 rd_unscattered: 0.0,
@@ -55,6 +58,7 @@ impl Simulation {
 
     pub fn configure_run(
         &mut self,
+        alpha: f64,
         dz: f64,
         dr: f64,
         da: f64,
@@ -65,6 +69,7 @@ impl Simulation {
         wth: f64,
         chance: f64,
     ) {
+        self.run_config.alpha = alpha;
         self.run_config.dz = dz;
         self.run_config.dr = dr;
         self.run_config.da = da;
@@ -132,6 +137,10 @@ impl Simulation {
 
     pub fn get_rd_ra(&self) -> Float64Array {
         Float64Array::from(self.results.rd_ra.as_slice())
+    }
+
+    pub fn get_rd_x(&self) -> Float64Array {
+        Float64Array::from(self.results.rd_x.as_slice())
     }
 
     pub fn get_a_rz(&self) -> Float64Array {

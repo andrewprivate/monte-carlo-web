@@ -15,9 +15,10 @@ export class LayerConfig {
 }
 
 export class RunConfig {
-  constructor (output_file, number_of_photons, dz, dr, nz, nr, na, nt, layers) {
+  constructor (output_file, number_of_photons, incident_angle, dz, dr, nz, nr, na, nt, layers) {
     this.output_file = output_file
     this.number_of_photons = number_of_photons
+    this.incident_angle = incident_angle
     this.dz = dz
     this.dr = dr
     this.da = 0.5 * Math.PI / na
@@ -69,6 +70,7 @@ export class MonteCarloConfigParser {
       const output_file = nextLine()
 
       const number_of_photons = parseInt(nextLine())
+      const incident_angle = parseInt(nextLine())
       const [dz, dr] = lineArgs().map(a => parseFloat(a))
       const [nz, nr, na, nt] = lineArgs().map(a => parseInt(a))
       const number_of_layers = parseInt(nextLine())
@@ -101,7 +103,7 @@ export class MonteCarloConfigParser {
         layer.cos_crit1 = n1 > n3 ? Math.sqrt(1 - n3 * n3 / (n1 * n1)) : 0
       }
 
-      runs.push(new RunConfig(output_file, number_of_photons, dz, dr, nz, nr, na, nt, layers))
+      runs.push(new RunConfig(output_file, number_of_photons, incident_angle, dz, dr, nz, nr, na, nt, layers))
     }
 
     return new MonteCarloConfig(runs)

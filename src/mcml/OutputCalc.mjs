@@ -92,6 +92,11 @@ export class OutputCalc {
     scale2 = 1.0 / n_photons
     results.rd *= scale2
     results.tt *= scale2
+
+    scale1 = 2 * nr / n_photons
+    for (let ir = 0; ir < nr * 2; ir++) {
+      results.rd_x[ir] *= scale1
+    }
   }
 
   static scaleA (runConfig, results) {

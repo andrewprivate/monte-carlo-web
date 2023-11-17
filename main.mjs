@@ -295,6 +295,11 @@ function initializeCharts () {
   Charts.absorbance = createLineChart('Absorbance Over Depth', 'Depth (cm)', 'Absorbance (-)')
   ChartsContainer.appendChild(Charts.absorbance.container)
 
+  Charts.reflectance2 = createLineChart('Diffuse Reflectance Over Horizontal Position', 'Horizontal Position (cm)', 'Diffused Reflectance (-)')
+  ChartsContainer.appendChild(Charts.reflectance2.container)
+  Charts.reflectance2.chart.options.scales.y.type = 'logarithmic'
+  Charts.reflectance2.chart.update()
+
   Charts.reflectance = createLineChart('Diffused Reflectance Over Distance', 'Distance (cm)', 'Diffused Reflectance (-)')
   ChartsContainer.appendChild(Charts.reflectance.container)
 
@@ -345,6 +350,23 @@ function appendChartData (result) {
   Charts.absorbance.appendData({
     label: runName,
     data: absorbanceData,
+    borderColor: color,
+    backgroundColor: color
+  })
+
+  const reflectanceData2 = []
+  for (let i = 0; i < result.rd_x.length; i++) {
+    if (!result.rd_x[i]) continue
+    const r = (result.config.dr) * (i + 0.5 - result.config.nr)
+    reflectanceData2.push({
+      x: r,
+      y: result.rd_x[i]
+    })
+  }
+
+  Charts.reflectance2.appendData({
+    label: runName,
+    data: reflectanceData2,
     borderColor: color,
     backgroundColor: color
   })

@@ -26,6 +26,7 @@ export class OutputWriter {
 
     this.writeALayer(result)
     this.writeAZ(result)
+    this.writeRdX(result)
     this.writeRdR(result)
     this.writeRdA(result)
     this.writeTtR(result)
@@ -56,6 +57,14 @@ export class OutputWriter {
     this.writeLine('Rd_r #Rd[0], [1],..Rd[nr-1]. [1/cm2]')
     for (let i = 0; i < results.rd_r.length; i++) {
       this.writeLine(results.rd_r[i])
+    }
+    this.writeLine('')
+  }
+
+  writeRdX (results) {
+    this.writeLine('Rd_x #Rd[0], [1],..Rd[2nr-1]. [-]')
+    for (let i = 0; i < results.rd_x.length; i++) {
+      this.writeLine(results.rd_x[i])
     }
     this.writeLine('')
   }
