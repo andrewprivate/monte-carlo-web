@@ -11,6 +11,7 @@
 ### Specify data for run 1
 temp1.mco	A				# output filename, ASCII/Binary
 10						# No. of photons
+0							# Incident angle
 20E-4	20E-4					# dz, dr
 10	20	30				# No. of dz, dr & da.
 
@@ -24,6 +25,7 @@ temp1.mco	A				# output filename, ASCII/Binary
 ### Specify data for run 2
 temp2.mco	A				# output filename, ASCII/Binary
 20						# No. of photons
+0							# Incident angle
 20E-4	20E-4					# dz, dr
 80	80	30				# No. of dz, dr & da.
 
